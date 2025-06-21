@@ -36,7 +36,7 @@ type Signer struct {
 var _ realy.I = &Signer{}
 
 // Generate a new Signer key pair using the CGO bindings to libsecp256k1
-func (s *Signer) Generate(nobtcec ...bool) (err error) {
+func (s *Signer) Generate() (err error) {
 	var cs *Sec
 	var cx *XPublicKey
 	if s.skb, s.pkb, cs, cx, err = Generate(); chk.E(err) {
@@ -44,17 +44,25 @@ func (s *Signer) Generate(nobtcec ...bool) (err error) {
 	}
 	s.SecretKey = &cs.Key
 	s.PublicKey = cx.Key
-	if len(nobtcec) > 0 && nobtcec[0] != true {
-	} else {
-		s.BTCECSec, _ = btcec.PrivKeyFromBytes(s.skb)
+	return
+}
+
+// GenerateForECDH a new Signer key pair using the CGO bindings to libsecp256k1
+func (s *Signer) GenerateForECDH() (err error) {
+	var cs *Sec
+	var cx *XPublicKey
+	if s.skb, s.pkb, cs, cx, err = Generate(); chk.E(err) {
+		return
 	}
+	s.SecretKey = &cs.Key
+	s.PublicKey = cx.Key
+	s.BTCECSec, _ = btcec.PrivKeyFromBytes(s.skb)
 	return
 }
 
 func (s *Signer) InitSec(skb []byte, nobtcec ...bool) (err error) {
 	var cs *Sec
 	var cx *XPublicKey
-	// var cp *PublicKey
 	if s.pkb, cs, cx, err = FromSecretBytes(skb); chk.E(err) {
 		if err.Error() != "provided secret generates a public key with odd Y coordinate, fixed version returned" {
 			log.E.Ln(err)
@@ -85,8 +93,6 @@ func (s *Signer) InitPub(pub []byte) (err error) {
 
 func (s *Signer) Sec() (b []byte) { return s.skb }
 func (s *Signer) Pub() (b []byte) { return s.pkb }
-
-// func (s *Signer) ECPub() (b []byte) { return s.pkb }
 
 func (s *Signer) Sign(msg []byte) (sig []byte, err error) {
 	if s.SecretKey == nil {
@@ -119,7 +125,18 @@ func (s *Signer) Verify(msg, sig []byte) (valid bool, err error) {
 	return
 }
 
+func (s *Signer) InitECDH() {
+	s.BTCECSec, _ = btcec.PrivKeyFromBytes(s.skb)
+}
+
 func (s *Signer) ECDH(pubkeyBytes []byte) (secret []byte, err error) {
+	if s.BTCECSec == nil {
+		if s.skb == nil {
+			err = errorf.E("p256k: Secret key bytes not initialized")
+			return
+		}
+		s.BTCECSec, _ = btcec.PrivKeyFromBytes(s.skb)
+	}
 	var pub *secp256k1.PublicKey
 	if pub, err = secp256k1.ParsePubKey(append([]byte{0x02}, pubkeyBytes...)); chk.E(err) {
 		return
@@ -127,4 +144,5 @@ func (s *Signer) ECDH(pubkeyBytes []byte) (secret []byte, err error) {
 	secret = btcec.GenerateSharedSecret(s.BTCECSec, pub)
 	return
 }
+
 func (s *Signer) Zero() { Zero(s.SecretKey) }

@@ -6,13 +6,12 @@ import (
 	"crypto/rand"
 	"unsafe"
 
-	"github.com/minio/sha256-simd"
-
 	"github.com/mleku/manifold/chk"
 	"github.com/mleku/manifold/ec/schnorr"
 	"github.com/mleku/manifold/ec/secp256k1"
 	"github.com/mleku/manifold/errorf"
 	"github.com/mleku/manifold/log"
+	"github.com/mleku/manifold/sha256"
 )
 
 /*
