@@ -78,6 +78,10 @@ type Tag struct {
 }
 
 func (t Tag) String() string {
+	if bytes.HasPrefix(t.value, BinPrefix) {
+		return fmt.Sprintf("%s:base64:%s", t.key,
+			base64.RawStdEncoding.EncodeToString(t.value[len(BinPrefix):]))
+	}
 	return fmt.Sprintf("%s:%s", t.key, t.value)
 }
 
@@ -115,6 +119,8 @@ var Sentinels = [][]byte{
 	[]byte("TAG:"),
 	[]byte("SIGNATURE:"),
 }
+
+var BinPrefix = []byte("BIN:")
 
 func (e *E) Unmarshal(data []byte) (err error) {
 	founds := make([]bool, len(Sentinels))
@@ -206,17 +212,30 @@ func (e *E) Unmarshal(data []byte) (err error) {
 			line = line[len(Sentinels[TAG]):]
 			keyEnd := bytes.IndexByte(line, ':')
 			if keyEnd == -1 {
-				err = errorf.E("invalid TAG format\n%s",
+				err = errorf.E("invalid TAG format at line %d\n%s",
 					lines, data)
 				return
 			}
-			var key []byte
+			var key, value []byte
 			if key, err = ReadText(bytes.NewBuffer(line[:keyEnd])); chk.E(err) {
 				return
 			}
-			var value []byte
-			if value, err = ReadText(bytes.NewBuffer(line[keyEnd+1:])); chk.E(err) {
-				return
+			rawValue := line[keyEnd+1:]
+			if bytes.HasPrefix(rawValue, []byte("base64:")) {
+				// Handle Base64 decoding
+				rawValue = rawValue[len("base64:"):] // Remove base64: prefix
+				value = make([]byte, base64.RawStdEncoding.
+					DecodedLen(len(rawValue))+len(BinPrefix))
+				copy(value, BinPrefix)
+				if _, err = base64.RawStdEncoding.Decode(value[len(BinPrefix):],
+					rawValue); chk.E(err) {
+					return
+				}
+			} else {
+				// Handle plain text
+				if value, err = ReadText(bytes.NewBuffer(rawValue)); chk.E(err) {
+					return
+				}
 			}
 			e.Tags = append(e.Tags, Tag{key, value})
 		case bytes.HasPrefix(line, Sentinels[SIGNATURE]):
@@ -290,8 +309,20 @@ out:
 					return
 				}
 				buf.WriteByte(':')
-				if err = WriteText(buf, v.value); chk.E(err) {
-					return
+				// Write the value
+				if isBinary(v.value) {
+					// Write as base64
+					base64Value := base64.RawStdEncoding.
+						EncodeToString(v.value[len(BinPrefix):])
+					if _, err = buf.Write([]byte("b64:" +
+						base64Value)); chk.E(err) {
+						return
+					}
+				} else {
+					// Write plain text
+					if err = WriteText(buf, v.value); chk.E(err) {
+						return
+					}
 				}
 				if t < len(e.Tags)-1 {
 					buf.WriteByte('\n')
@@ -313,6 +344,8 @@ out:
 	data = buf.Bytes()
 	return
 }
+
+func isBinary(data []byte) bool { return bytes.HasPrefix(data, BinPrefix) }
 
 func (e *E) Id() (id []byte, err error) {
 	e2 := &E{

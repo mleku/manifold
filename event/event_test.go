@@ -10,14 +10,14 @@ import (
 )
 
 func TestUnmarshal_Marshal(t *testing.T) {
-	data := []byte(`PUBKEY:XFbfJ2Pvwqjim3MSfE0pD0O1g/TssKOr9Y7tSgOjsds
+	data := []byte(`PUBKEY:TKil8DBVLaTITV4Wxx6updlywhTzKKtUOhE9BMgDWlM
 TIMESTAMP:1672531200
 CONTENT:example content\nwith linebreak\\nand escaped characters\n
 TAG:key1:value1
 TAG:key2:value2
-TAG:key3:value3
-TAG:key4:value4
-SIGNATURE:K7bXm1+7ab8+WZiieXY1Fyv4O3PwtQVwAIVDptgizJElHiTePe1H5jKHIBZP8QYiMa5tzgY5Foy8AKoSWuYS2g`,
+TAG:hashtag:winning
+TAG:mention:b64:XFbfJ2Pvwqjim3MSfE0pD0O1g/TssKOr9Y7tSgOjsds
+SIGNATURE:KxVCdk60Ml4JXknQR1iGdqj2YZ0Og3jFGsJ9ClRvxW56Y/0+kbDjJ/ciqju51iTonw/ZHa/znvltmYg9jOPngA`,
 	)
 	fmt.Printf("original raw event:\n%s\n", data)
 	e := new(E)
