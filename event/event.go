@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"io"
 
 	"github.com/mleku/manifold/chk"
@@ -77,31 +76,12 @@ type Tag struct {
 	value []byte
 }
 
-func (t Tag) String() string {
-	if bytes.HasPrefix(t.value, BinPrefix) {
-		return fmt.Sprintf("%s:base64:%s", t.key,
-			base64.RawStdEncoding.EncodeToString(t.value[len(BinPrefix):]))
-	}
-	return fmt.Sprintf("%s:%s", t.key, t.value)
-}
-
 type E struct {
 	Pubkey    []byte
 	Timestamp int64
 	Content   []byte
 	Tags      []Tag
 	Signature []byte
-}
-
-func (e *E) String() string {
-	return fmt.Sprintf(
-		"Pubkey (Base64): %s\nTimestamp (Decimal): %d\nContent: %s\nTags: %v\nSignature (Base64): %s",
-		base64.RawStdEncoding.EncodeToString(e.Pubkey),
-		e.Timestamp,
-		e.Content,
-		e.Tags,
-		base64.RawStdEncoding.EncodeToString(e.Signature),
-	)
 }
 
 const (
@@ -145,7 +125,7 @@ func (e *E) Unmarshal(data []byte) (err error) {
 			}
 			founds[PUBKEY] = true
 			e.Pubkey = make([]byte, schnorr.PubKeyBytesLen)
-			if _, err = base64.RawStdEncoding.Decode(e.Pubkey,
+			if _, err = base64.URLEncoding.Decode(e.Pubkey,
 				line[len(Sentinels[PUBKEY]):]); chk.E(err) {
 				return
 			}
@@ -187,10 +167,25 @@ func (e *E) Unmarshal(data []byte) (err error) {
 				return
 			}
 			founds[CONTENT] = true
-			content := line[len(Sentinels[CONTENT]):]
-			if e.Content, err = ReadText(bytes.NewBuffer(content)); chk.E(err) {
-				return
+			rawValue := line[len(Sentinels[CONTENT]):]
+			var content []byte
+			if bytes.HasPrefix(rawValue, []byte("b64:")) {
+				// Handle Base64 decoding
+				rawValue = rawValue[len("b64:"):] // Remove b64: prefix
+				content = make([]byte, base64.URLEncoding.
+					DecodedLen(len(rawValue))+len(BinPrefix))
+				copy(content, BinPrefix)
+				if _, err = base64.URLEncoding.Decode(content[len(BinPrefix):],
+					rawValue); chk.E(err) {
+					return
+				}
+			} else {
+				// Handle plain text
+				if content, err = ReadText(bytes.NewBuffer(rawValue)); chk.E(err) {
+					return
+				}
 			}
+			e.Content = content
 		case bytes.HasPrefix(line, Sentinels[TAG]):
 			switch {
 			case !founds[PUBKEY]:
@@ -221,13 +216,13 @@ func (e *E) Unmarshal(data []byte) (err error) {
 				return
 			}
 			rawValue := line[keyEnd+1:]
-			if bytes.HasPrefix(rawValue, []byte("base64:")) {
+			if bytes.HasPrefix(rawValue, []byte("b64:")) {
 				// Handle Base64 decoding
-				rawValue = rawValue[len("base64:"):] // Remove base64: prefix
-				value = make([]byte, base64.RawStdEncoding.
+				rawValue = rawValue[len("b64:"):] // Remove b64: prefix
+				value = make([]byte, base64.URLEncoding.
 					DecodedLen(len(rawValue))+len(BinPrefix))
 				copy(value, BinPrefix)
-				if _, err = base64.RawStdEncoding.Decode(value[len(BinPrefix):],
+				if _, err = base64.URLEncoding.Decode(value[len(BinPrefix):],
 					rawValue); chk.E(err) {
 					return
 				}
@@ -263,7 +258,7 @@ func (e *E) Unmarshal(data []byte) (err error) {
 			}
 			founds[SIGNATURE] = true
 			e.Signature = make([]byte, schnorr.SignatureSize)
-			if _, err = base64.RawStdEncoding.Decode(e.Signature,
+			if _, err = base64.URLEncoding.Decode(e.Signature,
 				line[len(Sentinels[SIGNATURE]):]); chk.E(err) {
 				return
 			}
@@ -292,16 +287,27 @@ out:
 		}
 		switch i {
 		case PUBKEY:
-			b := make([]byte, 43)
-			base64.RawStdEncoding.Encode(b, e.Pubkey)
+			b := make([]byte, 44)
+			base64.URLEncoding.Encode(b, e.Pubkey)
 			buf.Write(b)
 		case TIMESTAMP:
 			ts := ints.New(e.Timestamp)
 			b := ts.Marshal(nil)
 			buf.Write(b)
 		case CONTENT:
-			if err = WriteText(buf, e.Content); chk.E(err) {
-				return
+			if bytes.HasPrefix(e.Content, BinPrefix) {
+				// Write as base64
+				base64Value := base64.URLEncoding.
+					EncodeToString(e.Content[len(BinPrefix):])
+				if _, err = buf.Write([]byte("b64:" +
+					base64Value)); chk.E(err) {
+					return
+				}
+
+			} else {
+				if err = WriteText(buf, e.Content); chk.E(err) {
+					return
+				}
 			}
 		case TAG:
 			for t, v := range e.Tags {
@@ -312,7 +318,7 @@ out:
 				// Write the value
 				if isBinary(v.value) {
 					// Write as base64
-					base64Value := base64.RawStdEncoding.
+					base64Value := base64.URLEncoding.
 						EncodeToString(v.value[len(BinPrefix):])
 					if _, err = buf.Write([]byte("b64:" +
 						base64Value)); chk.E(err) {
@@ -336,8 +342,8 @@ out:
 			if e.Signature == nil {
 				break out
 			}
-			b := make([]byte, 86)
-			base64.RawStdEncoding.Encode(b, e.Signature)
+			b := make([]byte, 88)
+			base64.URLEncoding.Encode(b, e.Signature)
 			buf.Write(b)
 		}
 	}
