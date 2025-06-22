@@ -5,29 +5,64 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mleku/manifold/log"
-	"lukechampine.com/frand"
+	"github.com/mleku/manifold/chk"
+	"github.com/mleku/manifold/p256k"
 )
 
-func TestSplit(t *testing.T) {
-	b := frand.Bytes(64)
-	bb := make([]byte, 86)
-	base64.RawStdEncoding.Encode(bb, b)
-	log.I.F("%s", bb)
-	data := []byte(
-		"PUBKEY:c29tZV9yYW5kb21fZGF0YV9lbmNvZGVkX3NjZW5hcml\n" +
-			"TIMESTAMP:1672531200\n" +
-			"CONTENT:example content\nwith linebreak\n" +
-			"TAG:key1:value1\n" +
-			"TAG:key2:value2\n" +
-			"TAG:key3:value3\n" +
-			"SIGNATURE:DCw0ytbRPs3Q1LrQ7HhFYDE2Au8hWj4TZFVu/MJDdjJjirmznTFMSsyL1UM39KW18zgmHeQ5qjAqCo70fa23kQ",
+func TestUnmarshal_Marshal(t *testing.T) {
+	data := []byte(`PUBKEY:XFbfJ2Pvwqjim3MSfE0pD0O1g/TssKOr9Y7tSgOjsds
+TIMESTAMP:1672531200
+CONTENT:example content\nwith linebreak\\nand escaped characters\n
+TAG:key1:value1
+TAG:key2:value2
+TAG:key3:value3
+TAG:key4:value4
+SIGNATURE:K7bXm1+7ab8+WZiieXY1Fyv4O3PwtQVwAIVDptgizJElHiTePe1H5jKHIBZP8QYiMa5tzgY5Foy8AKoSWuYS2g`,
 	)
-	fmt.Printf("%s\n", data)
-	e, err := Split(data)
-	if err != nil {
+	fmt.Printf("original raw event:\n%s\n", data)
+	e := new(E)
+	var err error
+	if err = e.Unmarshal(data); chk.E(err) {
 		t.Fatalf("Error: %v", err)
 	} else {
-		t.Logf("Parsed Event:\n%s\n", e)
+		fmt.Printf("\nUnmarshalled Event:\n%s\n", e)
 	}
+	var b []byte
+	if b, err = e.Marshal(); chk.E(err) {
+		t.Fatalf("Error: %v", err)
+	}
+	fmt.Printf("\nMarshalled Event:\n%s\n", b)
+	var valid bool
+	if valid, err = e.Verify(); chk.E(err) {
+		t.Fatalf("failed to verify event: %v", err)
+	}
+	if !valid {
+		t.Fatalf("event signature is invalid")
+	}
+	t.Log("event signature is valid")
+	var c []byte
+	e.Signature = nil
+	if c, err = e.Marshal(); chk.E(err) {
+		t.Fatalf("Error: %v", err)
+	}
+	fmt.Printf("\nMarshalled canonical Event:\n%s\n", c)
+	var id []byte
+	if id, err = e.Id(); chk.E(err) {
+		t.Fatalf("failed to get event Id %v", err)
+	}
+	id64 := make([]byte, 43)
+	base64.RawStdEncoding.Encode(id64, id)
+	fmt.Printf("\nEvent Id: %s\n", id64)
+	sign := new(p256k.Signer)
+	if err = sign.Generate(); chk.E(err) {
+		t.Fatalf("failed to generate key pair: %v", err)
+	}
+	e.Pubkey = sign.Pub()
+	if err = e.Sign(sign); chk.E(err) {
+		t.Fatalf("failed to sign event: %v", err)
+	}
+	if b, err = e.Marshal(); chk.E(err) {
+		t.Fatalf("failed to marshal signed event: %v", err)
+	}
+	fmt.Printf("\nSigned Event:\n%s\n", b)
 }
