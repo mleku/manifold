@@ -1,7 +1,7 @@
-// Package varint is a variable integer encoding that works in reverse compared to the stdlib
-// binary Varint. The terminal byte in the encoding is the one with the 8th bit set. This is
-// basically like a base 128 encoding. It reads forward using an io.Reader and writes forward
-// using an io.Writer.
+// Package varint is a variable integer encoding that works in reverse compared
+// to the stdlib binary Varint. The terminal byte in the encoding is the one
+// with the 8th bit set. This is basically like a base 128 encoding. It reads
+// forward using an io.Reader and writes forward using an io.Writer.
 package varint
 
 import (

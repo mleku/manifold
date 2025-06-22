@@ -132,21 +132,28 @@ func (e *E) Unmarshal(data []byte) (err error) {
 		switch {
 		case bytes.HasPrefix(line, Sentinels[PUBKEY]):
 			if founds[PUBKEY] {
-				err = errorf.E("multiple PUBKEY found at line %d\n%s", lines, data)
+				err = errorf.E(
+					"multiple PUBKEY found at line %d\n%s",
+					lines, data)
 				return
 			}
 			founds[PUBKEY] = true
 			e.Pubkey = make([]byte, schnorr.PubKeyBytesLen)
-			if _, err = base64.RawStdEncoding.Decode(e.Pubkey, line[len(Sentinels[PUBKEY]):]); chk.E(err) {
+			if _, err = base64.RawStdEncoding.Decode(e.Pubkey,
+				line[len(Sentinels[PUBKEY]):]); chk.E(err) {
 				return
 			}
 		case bytes.HasPrefix(line, Sentinels[TIMESTAMP]):
 			switch {
 			case !founds[PUBKEY]:
-				err = errorf.E("TIMESTAMP found before PUBKEY at line %d\n%s", lines, data)
+				err = errorf.E(
+					"TIMESTAMP found before PUBKEY at line %d\n%s",
+					lines, data)
 				return
 			case founds[TIMESTAMP]:
-				err = errorf.E("multiple TIMESTAMP found at line %d\n%s", lines, data)
+				err = errorf.E(
+					"multiple TIMESTAMP found at line %d\n%s",
+					lines, data)
 				return
 			}
 			founds[TIMESTAMP] = true
@@ -158,13 +165,19 @@ func (e *E) Unmarshal(data []byte) (err error) {
 		case bytes.HasPrefix(line, Sentinels[CONTENT]):
 			switch {
 			case !founds[PUBKEY]:
-				err = errorf.E("CONTENT found before PUBKEY at line %d\n%s", lines, data)
+				err = errorf.E(
+					"CONTENT found before PUBKEY at line %d\n%s",
+					lines, data)
 				return
 			case !founds[TIMESTAMP]:
-				err = errorf.E("CONTENT found before TIMESTAMP at line %d\n%s", lines, data)
+				err = errorf.E(
+					"CONTENT found before TIMESTAMP at line %d\n%s",
+					lines, data)
 				return
 			case founds[CONTENT]:
-				err = errorf.E("multiple CONTENT found at line %d\n%s", lines, data)
+				err = errorf.E(
+					"multiple CONTENT found at line %d\n%s",
+					lines, data)
 				return
 			}
 			founds[CONTENT] = true
@@ -175,19 +188,26 @@ func (e *E) Unmarshal(data []byte) (err error) {
 		case bytes.HasPrefix(line, Sentinels[TAG]):
 			switch {
 			case !founds[PUBKEY]:
-				err = errorf.E("TAG found before PUBKEY at line %d\n%s", lines, data)
+				err = errorf.E(
+					"TAG found before PUBKEY at line %d\n%s",
+					lines, data)
 				return
 			case !founds[TIMESTAMP]:
-				err = errorf.E("TAG found before TIMESTAMP at line %d\n%s", lines, data)
+				err = errorf.E(
+					"TAG found before TIMESTAMP at line %d\n%s",
+					lines, data)
 				return
 			case !founds[CONTENT]:
-				err = errorf.E("TAG found before CONTENT at line %d\n%s", lines, data)
+				err = errorf.E(
+					"TAG found before CONTENT at line %d\n%s",
+					lines, data)
 				return
 			}
 			line = line[len(Sentinels[TAG]):]
 			keyEnd := bytes.IndexByte(line, ':')
 			if keyEnd == -1 {
-				err = errorf.E("invalid TAG format\n%s", lines, data)
+				err = errorf.E("invalid TAG format\n%s",
+					lines, data)
 				return
 			}
 			var key []byte
@@ -202,25 +222,35 @@ func (e *E) Unmarshal(data []byte) (err error) {
 		case bytes.HasPrefix(line, Sentinels[SIGNATURE]):
 			switch {
 			case !founds[PUBKEY]:
-				err = errorf.E("SIGNATURE found before PUBKEY at line %d\n%s", lines, data)
+				err = errorf.E(
+					"SIGNATURE found before PUBKEY at line %d\n%s",
+					lines, data)
 				return
 			case !founds[TIMESTAMP]:
-				err = errorf.E("SIGNATURE found before TIMESTAMP at line %d\n%s", lines, data)
+				err = errorf.E(
+					"SIGNATURE found before TIMESTAMP at line %d\n%s",
+					lines, data)
 				return
 			case !founds[CONTENT]:
-				err = errorf.E("SIGNATURE found before CONTENT at line %d\n%s", lines, data)
+				err = errorf.E(
+					"SIGNATURE found before CONTENT at line %d\n%s",
+					lines, data)
 				return
 			case founds[SIGNATURE]:
-				err = errorf.E("multiple SIGNATURE found\n%s", lines, data)
+				err = errorf.E(
+					"multiple SIGNATURE found\n%s",
+					lines, data)
 				return
 			}
 			founds[SIGNATURE] = true
 			e.Signature = make([]byte, schnorr.SignatureSize)
-			if _, err = base64.RawStdEncoding.Decode(e.Signature, line[len(Sentinels[SIGNATURE]):]); chk.E(err) {
+			if _, err = base64.RawStdEncoding.Decode(e.Signature,
+				line[len(Sentinels[SIGNATURE]):]); chk.E(err) {
 				return
 			}
 		default:
-			err = errorf.E("unknown sentinel on line %d: '%s'\n%s", lines, line, data)
+			err = errorf.E("unknown sentinel on line %d: '%s'\n%s",
+				lines, line, data)
 			return
 		}
 	}
