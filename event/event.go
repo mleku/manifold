@@ -125,7 +125,7 @@ func (e *E) Unmarshal(data []byte) (err error) {
 			}
 			founds[PUBKEY] = true
 			e.Pubkey = make([]byte, schnorr.PubKeyBytesLen)
-			if _, err = base64.URLEncoding.Decode(e.Pubkey,
+			if _, err = base64.RawURLEncoding.Decode(e.Pubkey,
 				line[len(Sentinels[PUBKEY]):]); chk.E(err) {
 				return
 			}
@@ -258,7 +258,7 @@ func (e *E) Unmarshal(data []byte) (err error) {
 			}
 			founds[SIGNATURE] = true
 			e.Signature = make([]byte, schnorr.SignatureSize)
-			if _, err = base64.URLEncoding.Decode(e.Signature,
+			if _, err = base64.RawURLEncoding.Decode(e.Signature,
 				line[len(Sentinels[SIGNATURE]):]); chk.E(err) {
 				return
 			}
@@ -287,8 +287,8 @@ out:
 		}
 		switch i {
 		case PUBKEY:
-			b := make([]byte, 44)
-			base64.URLEncoding.Encode(b, e.Pubkey)
+			b := make([]byte, 43)
+			base64.RawURLEncoding.Encode(b, e.Pubkey)
 			buf.Write(b)
 		case TIMESTAMP:
 			ts := ints.New(e.Timestamp)
@@ -342,8 +342,8 @@ out:
 			if e.Signature == nil {
 				break out
 			}
-			b := make([]byte, 88)
-			base64.URLEncoding.Encode(b, e.Signature)
+			b := make([]byte, 86)
+			base64.RawURLEncoding.Encode(b, e.Signature)
 			buf.Write(b)
 		}
 	}
