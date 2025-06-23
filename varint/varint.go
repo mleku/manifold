@@ -8,9 +8,10 @@ import (
 	"io"
 
 	"github.com/mleku/manifold/chk"
+	"golang.org/x/exp/constraints"
 )
 
-func Encode(w io.Writer, v uint64) {
+func Encode[V constraints.Integer](w io.Writer, v V) {
 	x := []byte{0}
 	for {
 		x[0] = byte(v) & 127
@@ -41,5 +42,4 @@ func Decode(r io.Reader) (v uint64, err error) {
 			i++
 		}
 	}
-	// }
 }
