@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/base64"
-	"io"
 
 	"manifold.mleku.dev/chk"
 	"manifold.mleku.dev/ec/schnorr"
@@ -13,74 +12,68 @@ import (
 	"manifold.mleku.dev/p256k"
 	"manifold.mleku.dev/sha256"
 	"manifold.mleku.dev/signer"
+	"manifold.mleku.dev/text"
 )
 
-func WriteText(w io.Writer, b []byte) (err error) {
-out:
-	for i := range b {
-		switch b[i] {
-		case '\n':
-			if _, err = w.Write([]byte{'\\', 'n'}); chk.E(err) {
-				break out
-			}
-		case '\\':
-			if _, err = w.Write([]byte{'\\', '\\'}); chk.E(err) {
-				break out
-			}
-		default:
-			if _, err = w.Write(b[i : i+1]); chk.E(err) {
-				break out
-			}
-		}
-	}
-	return
-}
-
-func ReadText(r io.Reader) (b []byte, err error) {
-	buf := new(bytes.Buffer)
-	var inEscape bool
-	var n int
-	rb := make([]byte, 1)
-	for {
-		if n, err = r.Read(rb); chk.E(err) {
-			if err == io.EOF {
-				err = nil
-			}
-			break
-		}
-		if n == 0 {
-			break
-		}
-		if rb[0] == '\\' && !inEscape {
-			inEscape = true
-			// next byte determines which
-			continue
-		}
-		if inEscape {
-			switch rb[0] {
-			case 'n':
-				rb[0] = '\n'
-			case '\\':
-				rb[0] = '\\'
-			}
-			inEscape = false
-		}
-		buf.WriteByte(rb[0])
-	}
-	b = buf.Bytes()
-	return
-}
-
+// Tag is a simple and uniform Key/Value data structure used to annotate an
+// event with various kinds of metadata, including such as the application or
+// mimetype, without cluttering the event specification with a single purpose
+// but repetitive extra field as exists in the Nostr event data structure "kind"
+// field. In addition, because whole actual words are permitted instead of only
+// a single letter, where in the Nostr protocol often there is a third value
+// that acts as a qualifier for the primary key type, this is unnecessary
+// because the key itself can be the qualifier, eg "root" or "reply".
+//
+// Furthermore, the semantics are that there will be some keys that indicate
+// something, such as the encoding format of the content field, and these tags
+// then go along with further qualifier tags that provide parameters to increase
+// the options. Such as, say if an event content stores audio, there can be an
+// encoding key, which might say aiff and another saying bitlength, and maybe
+// another saying compression:runline or whatever.
 type Tag struct {
-	key   []byte
-	value []byte
+	Key   []byte
+	Value []byte
 }
 
+type Tags []Tag
+
+// GetAll returns all tags found that have the requested key.
+func (t Tags) GetAll(k []byte) (tt Tags) {
+	for _, v := range t {
+		if bytes.Equal(v.Key, k) {
+			tt = append(tt, v)
+		}
+	}
+	return
+}
+
+// GetFirst should be used when the tag rules say that a specific tag must only
+// appear once. Examples might be mimetype, encoding, etc.
+func (t Tags) GetFirst(k []byte) (tt Tag) {
+	for _, v := range t {
+		if bytes.Equal(v.Key, k) {
+			return v
+		}
+	}
+	return
+}
+
+// E is the content of a manifold event.
+//
+// Note that it does not include a "kind"--the reason for this is that such
+// semantics can be expressed already using a Tag instead.
+//
+// Note also it does not include an Id - the reason for this is that the ID is
+// derived from the event itself, without the signature, and the
+// Marshal/Unmarshal functions expect strict ordering exactly as shown in this
+// structure, and when marshalled in this way, the content can be directly
+// hashed to get the Id, in order to check the signature, with the necessary
+// Pubkey right there in the message.
 type E struct {
 	Pubkey    []byte
 	Timestamp int64
 	Content   []byte
-	Tags      []Tag
+	Tags      Tags
 	Signature []byte
 }
 
@@ -181,7 +174,7 @@ func (e *E) Unmarshal(data []byte) (err error) {
 				}
 			} else {
 				// Handle plain text
-				if content, err = ReadText(bytes.NewBuffer(rawValue)); chk.E(err) {
+				if content, err = text.Read(bytes.NewBuffer(rawValue)); chk.E(err) {
 					return
 				}
 			}
@@ -212,7 +205,7 @@ func (e *E) Unmarshal(data []byte) (err error) {
 				return
 			}
 			var key, value []byte
-			if key, err = ReadText(bytes.NewBuffer(line[:keyEnd])); chk.E(err) {
+			if key, err = text.Read(bytes.NewBuffer(line[:keyEnd])); chk.E(err) {
 				return
 			}
 			rawValue := line[keyEnd+1:]
@@ -228,7 +221,7 @@ func (e *E) Unmarshal(data []byte) (err error) {
 				}
 			} else {
 				// Handle plain text
-				if value, err = ReadText(bytes.NewBuffer(rawValue)); chk.E(err) {
+				if value, err = text.Read(bytes.NewBuffer(rawValue)); chk.E(err) {
 					return
 				}
 			}
@@ -305,28 +298,28 @@ out:
 				}
 
 			} else {
-				if err = WriteText(buf, e.Content); chk.E(err) {
+				if err = text.Write(buf, e.Content); chk.E(err) {
 					return
 				}
 			}
 		case TAG:
 			for t, v := range e.Tags {
-				if err = WriteText(buf, v.key); chk.E(err) {
+				if err = text.Write(buf, v.Key); chk.E(err) {
 					return
 				}
 				buf.WriteByte(':')
 				// Write the value
-				if isBinary(v.value) {
+				if isBinary(v.Value) {
 					// Write as base64
 					base64Value := base64.URLEncoding.
-						EncodeToString(v.value[len(BinPrefix):])
+						EncodeToString(v.Value[len(BinPrefix):])
 					if _, err = buf.Write([]byte("b64:" +
 						base64Value)); chk.E(err) {
 						return
 					}
 				} else {
 					// Write plain text
-					if err = WriteText(buf, v.value); chk.E(err) {
+					if err = text.Write(buf, v.Value); chk.E(err) {
 						return
 					}
 				}

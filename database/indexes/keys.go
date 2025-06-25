@@ -161,6 +161,9 @@ func IdPubkeyTimestampVars() (ser *Uint40, t *fullid.T, p *pubhash.T, ts *Uint64
 func IdPubkeyTimestampEnc(ser *Uint40, t *fullid.T, p *pubhash.T, ts *Uint64) (enc *T) {
 	return New(NewPrefix(IdPubkeyTimestamp), ser, t, p, ts)
 }
+func IdPubkeyTimestampSearch(ser *Uint40) (enc *T) {
+	return New(NewPrefix(IdPubkeyTimestamp), ser)
+}
 func IdPubkeyTimestampDec(ser *Uint40, t *fullid.T, p *pubhash.T, ts *Uint64) (enc *T) {
 	return New(NewPrefix(), ser, t, p, ts)
 }
@@ -211,11 +214,11 @@ func PubkeyTagTimestampVars() (p *pubhash.T, k, v *identhash.T, ser *Uint40) {
 	ser = new(Uint40)
 	return
 }
-func PubkeyTagTimestampEnc(p *pubhash.T, k, v *identhash.T, ser *Uint40) (enc *T) {
-	return New(NewPrefix(PubkeyTagTimestamp), p, k, v, ser)
+func PubkeyTagTimestampEnc(p *pubhash.T, k, v *identhash.T, ts *Uint64, ser *Uint40) (enc *T) {
+	return New(NewPrefix(PubkeyTagTimestamp), p, k, v, ts, ser)
 }
-func PubkeyTagTimestampDec(p *pubhash.T, k, v *identhash.T, ser *Uint40) (enc *T) {
-	return New(NewPrefix(), p, k, v, ser)
+func PubkeyTagTimestampDec(p *pubhash.T, k, v *identhash.T, ts *Uint64, ser *Uint40) (enc *T) {
+	return New(NewPrefix(), p, k, v, ts, ser)
 }
 
 // TagTimestamp allows searching for a tag and filter by timestamp.

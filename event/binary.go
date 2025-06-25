@@ -29,12 +29,12 @@ func (e *E) WriteBinary(w io.Writer) (err error) {
 	}
 	Encode(w, len(e.Tags))
 	for _, v := range e.Tags {
-		Encode(w, len(v.key))
-		if _, err = w.Write(v.key); ck(err) {
+		Encode(w, len(v.Key))
+		if _, err = w.Write(v.Key); ck(err) {
 			return
 		}
-		Encode(w, len(v.value))
-		if _, err = w.Write(v.value); ck(err) {
+		Encode(w, len(v.Value))
+		if _, err = w.Write(v.Value); ck(err) {
 			return
 		}
 	}
