@@ -14,7 +14,7 @@ import (
 )
 
 func (d *D) GetEventIndexes(ev *event.E) (indices [][]byte, ser *number.Uint40, err error) {
-	// get a new serial
+
 	ser = new(number.Uint40)
 	var s uint64
 	if s, err = d.Serial(); chk.E(err) {
@@ -89,10 +89,5 @@ func (d *D) GetEventIndexes(ev *event.E) (indices [][]byte, ser *number.Uint40, 
 		indices = append(indices, ptb.Bytes())
 	}
 
-	var ftk [][]byte
-	if ftk, err = d.GetFulltextKeys(ev, ser); chk.E(err) {
-		return
-	}
-	indices = append(indices, ftk...)
 	return
 }
