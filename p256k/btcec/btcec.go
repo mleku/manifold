@@ -2,12 +2,12 @@
 package btcec
 
 import (
-	"github.com/mleku/manifold/chk"
-	ec "github.com/mleku/manifold/ec"
-	"github.com/mleku/manifold/ec/schnorr"
-	"github.com/mleku/manifold/ec/secp256k1"
-	"github.com/mleku/manifold/errorf"
-	"github.com/mleku/manifold/signer"
+	"manifold.mleku.dev/chk"
+	ec "manifold.mleku.dev/ec"
+	"manifold.mleku.dev/ec/schnorr"
+	"manifold.mleku.dev/ec/secp256k1"
+	"manifold.mleku.dev/errorf"
+	"manifold.mleku.dev/signer"
 )
 
 // Signer is an implementation of signer.I that uses the btcec library.

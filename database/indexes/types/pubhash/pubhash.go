@@ -3,11 +3,11 @@ package pubhash
 import (
 	"io"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/ec/schnorr"
-	"github.com/mleku/manifold/errorf"
-	"github.com/mleku/manifold/hex"
-	"github.com/mleku/manifold/sha256"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/schnorr"
+	"manifold.mleku.dev/errorf"
+	"manifold.mleku.dev/hex"
+	"manifold.mleku.dev/sha256"
 )
 
 const Len = 8

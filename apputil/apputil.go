@@ -3,14 +3,16 @@ package apputil
 import (
 	"os"
 	"path/filepath"
+
+	"manifold.mleku.dev/chk"
 )
 
 // EnsureDir checks a file could be written to a path, creates the directories as needed
 func EnsureDir(fileName string) {
 	dirName := filepath.Dir(fileName)
-	if _, serr := os.Stat(dirName); serr != nil {
+	if _, err := os.Stat(dirName); chk.E(err) {
 		merr := os.MkdirAll(dirName, os.ModePerm)
-		if merr != nil {
+		if chk.E(merr) {
 			panic(merr)
 		}
 	}

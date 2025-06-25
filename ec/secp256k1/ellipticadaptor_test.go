@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mleku/manifold/chk"
+	"manifold.mleku.dev/chk"
 )
 
 // randBytes returns a byte slice of the required size created from a random

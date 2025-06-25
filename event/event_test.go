@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/p256k"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/p256k"
 )
 
 func TestUnmarshal_Marshal(t *testing.T) {

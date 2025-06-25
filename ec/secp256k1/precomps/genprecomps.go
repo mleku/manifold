@@ -13,9 +13,9 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/ec/secp256k1"
-	"github.com/mleku/manifold/log"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/secp256k1"
+	"manifold.mleku.dev/log"
 )
 
 // curveParams houses the secp256k1 curve parameters for convenient access.
@@ -311,12 +311,12 @@ func main() {
 	}
 	serialized := serializedBytePoints()
 	embedded, err := os.Create("secp256k1/rawbytepoints.bin")
-	if err != nil {
+	if chk.E(err) {
 		log.F.Ln(err)
 		os.Exit(1)
 	}
 	n, err := embedded.Write(serialized)
-	if err != nil {
+	if chk.E(err) {
 		panic(err)
 	}
 	if n != len(serialized) {

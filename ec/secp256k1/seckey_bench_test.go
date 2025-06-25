@@ -6,6 +6,8 @@ package secp256k1
 
 import (
 	"testing"
+
+	"manifold.mleku.dev/chk"
 )
 
 // BenchmarkSecretKeyGenerate benchmarks generating new cryptographically
@@ -15,7 +17,7 @@ func BenchmarkSecretKeyGenerate(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := GenerateSecretKey()
-		if err != nil {
+		if chk.E(err) {
 			b.Fatal(err)
 		}
 	}

@@ -7,7 +7,7 @@ import (
 
 	"lukechampine.com/frand"
 
-	"github.com/mleku/manifold/chk"
+	"manifold.mleku.dev/chk"
 )
 
 func TestEncode_Decode(t *testing.T) {

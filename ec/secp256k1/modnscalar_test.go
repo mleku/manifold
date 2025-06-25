@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/hex"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/hex"
 )
 
 // SetHex interprets the provided hex string as a 256-bit big-endian unsigned

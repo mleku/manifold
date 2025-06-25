@@ -5,8 +5,9 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/mleku/manifold/ec/chainhash"
-	"github.com/mleku/manifold/ec/wire"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/chainhash"
+	"manifold.mleku.dev/ec/wire"
 )
 
 var (
@@ -415,7 +416,7 @@ var MainNetParams = Params{
 // hard-coded, and therefore known good, hashes.
 func newHashFromStr(hexStr string) *chainhash.Hash {
 	hash, err := chainhash.NewHashFromStr(hexStr)
-	if err != nil {
+	if chk.E(err) {
 		// Ordinarily I don't like panics in library code since it
 		// can take applications down without them having a chance to
 		// recover which is extremely annoying, however an exception is

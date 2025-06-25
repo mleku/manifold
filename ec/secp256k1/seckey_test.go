@@ -11,12 +11,14 @@ import (
 	"errors"
 	"math/big"
 	"testing"
+
+	"manifold.mleku.dev/chk"
 )
 
 // TestGenerateSecretKey ensures the key generation works as expected.
 func TestGenerateSecretKey(t *testing.T) {
 	sec, err := GenerateSecretKey()
-	if err != nil {
+	if chk.E(err) {
 		t.Errorf("failed to generate secret key: %s", err)
 		return
 	}
@@ -30,7 +32,7 @@ func TestGenerateSecretKey(t *testing.T) {
 // entropy source works as expected.
 func TestGenerateSecretKeyFromRand(t *testing.T) {
 	sec, err := GenerateSecretKeyFromRand(rand.Reader)
-	if err != nil {
+	if chk.E(err) {
 		t.Errorf("failed to generate secret key: %s", err)
 		return
 	}
@@ -79,7 +81,7 @@ func TestGenerateSecretKeyCorners(t *testing.T) {
 	// is the expected one.  It should be the value "1" since the other values
 	// the sequence produces are invalid and thus should be rejected.
 	sec, err := GenerateSecretKeyFromRand(mockReader)
-	if err != nil {
+	if chk.E(err) {
 		t.Errorf("failed to generate secret key: %s", err)
 		return
 	}

@@ -7,13 +7,15 @@ package bech32
 import (
 	"encoding/hex"
 	"fmt"
+
+	"manifold.mleku.dev/chk"
 )
 
 // This example demonstrates how to decode a bech32 encoded string.
 func ExampleDecode() {
 	encoded := "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k7grplx"
 	hrp, decoded, err := Decode([]byte(encoded))
-	if err != nil {
+	if chk.E(err) {
 		fmt.Println("Error:", err)
 	}
 	// Show the decoded data.
@@ -29,11 +31,11 @@ func ExampleEncode() {
 	data := []byte("Test data")
 	// Convert test data to base32:
 	conv, err := ConvertBits(data, 8, 5, true)
-	if err != nil {
+	if chk.E(err) {
 		fmt.Println("Error:", err)
 	}
 	encoded, err := Encode([]byte("customHrp!11111q"), conv)
-	if err != nil {
+	if chk.E(err) {
 		fmt.Println("Error:", err)
 	}
 	// Show the encoded data.

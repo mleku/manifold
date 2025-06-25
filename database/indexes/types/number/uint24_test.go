@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"reflect"
 	"testing"
+
+	"manifold.mleku.dev/chk"
 )
 
 func TestUint24(t *testing.T) {
@@ -25,11 +27,11 @@ func TestUint24(t *testing.T) {
 			// Test Set
 			err := codec.Set(tt.value)
 			if tt.expectedErr {
-				if err == nil {
+				if !chk.E(err) {
 					t.Errorf("expected error but got none")
 				}
 				return
-			} else if err != nil {
+			} else if chk.E(err) {
 				t.Errorf("unexpected error: %v", err)
 				return
 			}
@@ -43,7 +45,7 @@ func TestUint24(t *testing.T) {
 			buf := new(bytes.Buffer)
 
 			// MarshalWrite directly to the buffer
-			if err := codec.MarshalWrite(buf); err != nil {
+			if err := codec.MarshalWrite(buf); chk.E(err) {
 				t.Fatalf("MarshalWrite failed: %v", err)
 			}
 
@@ -55,7 +57,7 @@ func TestUint24(t *testing.T) {
 
 			// Decode from the buffer
 			decoded := new(Uint24)
-			if err := decoded.UnmarshalRead(buf); err != nil {
+			if err := decoded.UnmarshalRead(buf); chk.E(err) {
 				t.Fatalf("UnmarshalRead failed: %v", err)
 			}
 

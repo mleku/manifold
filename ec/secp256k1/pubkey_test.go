@@ -9,6 +9,8 @@ import (
 	"bytes"
 	"errors"
 	"testing"
+
+	"manifold.mleku.dev/chk"
 )
 
 // TestParsePubKey ensures that public keys are properly parsed according
@@ -209,7 +211,7 @@ func TestParsePubKey(t *testing.T) {
 				test.err)
 			continue
 		}
-		if err != nil {
+		if chk.E(err) {
 			continue
 		}
 		// Ensure the x and y coordinates match the expected values upon
@@ -392,7 +394,7 @@ func TestPublicKeyAsJacobian(t *testing.T) {
 		wantX := hexToFieldVal(test.wantX)
 		wantY := hexToFieldVal(test.wantY)
 		pubKey, err := ParsePubKey(pubKeyBytes)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("%s: failed to parse public key: %v", test.name, err)
 			continue
 		}

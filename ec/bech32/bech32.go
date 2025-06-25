@@ -8,6 +8,8 @@ package bech32
 import (
 	"bytes"
 	"strings"
+
+	"manifold.mleku.dev/chk"
 )
 
 // Charset is the set of characters used in the data section of bech32 strings.
@@ -201,7 +203,7 @@ func decodeNoLimit(bech []byte) ([]byte, []byte, Version, error) {
 	// Each character corresponds to the byte with value of the index in
 	// 'charset'.
 	decoded, err := toBytes(data)
-	if err != nil {
+	if chk.E(err) {
 		return nil, nil, VersionUnknown, err
 	}
 	// Verify if the checksum (stored inside decoded[:]) is valid, given the
@@ -385,7 +387,7 @@ func ConvertBits(data []byte, fromBits, toBits uint8, pad bool) ([]byte,
 // checksum purposes.
 func EncodeFromBase256(hrp, data []byte) ([]byte, error) {
 	converted, err := ConvertBits(data, 8, 5, true)
-	if err != nil {
+	if chk.E(err) {
 		return nil, err
 	}
 	return Encode(hrp, converted)
@@ -396,11 +398,11 @@ func EncodeFromBase256(hrp, data []byte) ([]byte, error) {
 // base256-encoded byte slice and returns it along with the lowercase HRP.
 func DecodeToBase256(bech []byte) ([]byte, []byte, error) {
 	hrp, data, err := Decode(bech)
-	if err != nil {
+	if chk.E(err) {
 		return nil, nil, err
 	}
 	converted, err := ConvertBits(data, 5, 8, false)
-	if err != nil {
+	if chk.E(err) {
 		return nil, nil, err
 	}
 	return hrp, converted, nil

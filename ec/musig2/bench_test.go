@@ -8,9 +8,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mleku/manifold/ec"
-	"github.com/mleku/manifold/ec/schnorr"
-	"github.com/mleku/manifold/hex"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec"
+	"manifold.mleku.dev/ec/schnorr"
+	"manifold.mleku.dev/hex"
 )
 
 var (
@@ -20,7 +21,7 @@ var (
 
 func hexToBytes(s string) []byte {
 	b, err := hex.Dec(s)
-	if err != nil {
+	if chk.E(err) {
 		panic("invalid hex in source file: " + s)
 	}
 	return b
@@ -28,7 +29,7 @@ func hexToBytes(s string) []byte {
 
 func hexToModNScalar(s string) *btcec.ModNScalar {
 	b, err := hex.Dec(s)
-	if err != nil {
+	if chk.E(err) {
 		panic("invalid hex in source file: " + s)
 	}
 	var scalar btcec.ModNScalar
@@ -40,12 +41,12 @@ func hexToModNScalar(s string) *btcec.ModNScalar {
 
 func genSigner(t *testing.B) signer {
 	privKey, err := btcec.NewSecretKey()
-	if err != nil {
+	if chk.E(err) {
 		t.Fatalf("unable to gen priv key: %v", err)
 	}
 	pubKey := privKey.PubKey()
 	nonces, err := GenNonces(WithPublicKey(pubKey))
-	if err != nil {
+	if chk.E(err) {
 		t.Fatalf("unable to gen nonces: %v", err)
 	}
 	return signer{
@@ -74,7 +75,7 @@ func BenchmarkPartialSign(b *testing.B) {
 					signers[i] = genSigner(b)
 				}
 				combinedNonce, err := AggregateNonces(signers.pubNonces())
-				if err != nil {
+				if chk.E(err) {
 					b.Fatalf("unable to generate combined nonce: %v", err)
 				}
 				var sig *PartialSignature
@@ -96,7 +97,7 @@ func BenchmarkPartialSign(b *testing.B) {
 							signers[0].nonces.SecNonce, signers[0].privKey,
 							combinedNonce, keys, msg, signOpts...,
 						)
-						if err != nil {
+						if chk.E(err) {
 							b.Fatalf("unable to generate sig: %v", err)
 						}
 					}
@@ -127,7 +128,7 @@ func BenchmarkPartialSign(b *testing.B) {
 // 			combinedNonce, err := AggregateNonces(
 // 				signers.pubNonces(),
 // 			)
-// 			if err != nil {
+// 			if chk.E(err) {
 // 				b.Fatalf("unable to generate combined "+
 // 					"nonce: %v", err)
 // 			}
@@ -140,7 +141,7 @@ func BenchmarkPartialSign(b *testing.B) {
 // 				signers[0].nonces.SecNonce, signers[0].privKey,
 // 				combinedNonce, signers.keys(), msg,
 // 			)
-// 			if err != nil {
+// 			if chk.E(err) {
 // 				b.Fatalf("unable to generate sig: %v", err)
 // 			}
 // 			keys := signers.keys()
@@ -182,7 +183,7 @@ func BenchmarkCombineSigs(b *testing.B) {
 			signers[i] = genSigner(b)
 		}
 		combinedNonce, err := AggregateNonces(signers.pubNonces())
-		if err != nil {
+		if chk.E(err) {
 			b.Fatalf("unable to generate combined nonce: %v", err)
 		}
 		var msg [32]byte
@@ -194,7 +195,7 @@ func BenchmarkCombineSigs(b *testing.B) {
 				signer.nonces.SecNonce, signer.privKey,
 				combinedNonce, signers.keys(), msg,
 			)
-			if err != nil {
+			if chk.E(err) {
 				b.Fatalf("unable to generate partial sig: %v",
 					err)
 			}
@@ -229,7 +230,7 @@ func BenchmarkAggregateNonces(b *testing.B) {
 			b.ResetTimer()
 			b.ReportAllocs()
 			pubNonce, err := AggregateNonces(nonces)
-			if err != nil {
+			if chk.E(err) {
 				b.Fatalf("unable to generate nonces: %v", err)
 			}
 			testNonce = pubNonce

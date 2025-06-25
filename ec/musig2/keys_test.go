@@ -11,11 +11,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"manifold.mleku.dev/chk"
 
-	"github.com/mleku/manifold/ec"
-	"github.com/mleku/manifold/ec/schnorr"
-	"github.com/mleku/manifold/ec/secp256k1"
-	"github.com/mleku/manifold/hex"
+	"manifold.mleku.dev/ec"
+	"manifold.mleku.dev/ec/schnorr"
+	"manifold.mleku.dev/ec/secp256k1"
+	"manifold.mleku.dev/hex"
 )
 
 const (
@@ -90,7 +91,7 @@ func keysFromIndices(t *testing.T, indices []int,
 		inputKeys[i], err = btcec.ParsePubKey(
 			mustParseHex(pubKeys[keyIdx]),
 		)
-		if err != nil {
+		if chk.E(err) {
 			return nil, err
 		}
 	}
@@ -165,7 +166,7 @@ func TestMuSig2KeyAggTestVectors(t *testing.T) {
 			)
 			// In this set of test cases, we should only get this
 			// for the very first vector.
-			if err != nil {
+			if chk.E(err) {
 				switch testCase.Comment {
 				case "Invalid public key":
 					require.ErrorIs(

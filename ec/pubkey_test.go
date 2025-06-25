@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
+	"manifold.mleku.dev/chk"
 )
 
 type pubKeyTest struct {
@@ -217,7 +218,7 @@ var pubKeyTests = []pubKeyTest{
 func TestPubKeys(t *testing.T) {
 	for _, test := range pubKeyTests {
 		pk, err := ParsePubKey(test.key)
-		if err != nil {
+		if chk.E(err) {
 			if test.isValid {
 				t.Errorf("%s pubkey failed when shouldn't %v",
 					test.name, err)
@@ -255,7 +256,7 @@ func TestPublicKeyIsEqual(t *testing.T) {
 			0x7f, 0x5b, 0x2a, 0x4b, 0x7d, 0x44, 0x8e,
 		},
 	)
-	if err != nil {
+	if chk.E(err) {
 		t.Fatalf("failed to parse raw bytes for pubKey1: %v", err)
 	}
 	pubKey2, err := ParsePubKey(
@@ -265,7 +266,7 @@ func TestPublicKeyIsEqual(t *testing.T) {
 			0xa9, 0xa1, 0xf4, 0x80, 0x9d, 0x3b, 0x4d,
 		},
 	)
-	if err != nil {
+	if chk.E(err) {
 		t.Fatalf("failed to parse raw bytes for pubKey2: %v", err)
 	}
 	if !pubKey1.IsEqual(pubKey1) {

@@ -2,7 +2,7 @@
 package chk
 
 import (
-	"github.com/mleku/manifold/lol"
+	"manifold.mleku.dev/lol"
 )
 
 var F, E, W, I, D, T lol.Chk

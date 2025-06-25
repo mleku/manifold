@@ -6,13 +6,13 @@ import (
 	"encoding/base64"
 	"io"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/ec/schnorr"
-	"github.com/mleku/manifold/errorf"
-	"github.com/mleku/manifold/ints"
-	"github.com/mleku/manifold/p256k"
-	"github.com/mleku/manifold/sha256"
-	"github.com/mleku/manifold/signer"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/schnorr"
+	"manifold.mleku.dev/errorf"
+	"manifold.mleku.dev/ints"
+	"manifold.mleku.dev/p256k"
+	"manifold.mleku.dev/sha256"
+	"manifold.mleku.dev/signer"
 )
 
 func WriteText(w io.Writer, b []byte) (err error) {
@@ -42,7 +42,7 @@ func ReadText(r io.Reader) (b []byte, err error) {
 	var n int
 	rb := make([]byte, 1)
 	for {
-		if n, err = r.Read(rb); err != nil {
+		if n, err = r.Read(rb); chk.E(err) {
 			if err == io.EOF {
 				err = nil
 			}
@@ -361,7 +361,7 @@ func (e *E) Id() (id []byte, err error) {
 		Tags:      e.Tags,
 	}
 	var data []byte
-	if data, err = e2.Marshal(); err != nil {
+	if data, err = e2.Marshal(); chk.E(err) {
 		return
 	}
 	id = sha256.Sum256Bytes(data)

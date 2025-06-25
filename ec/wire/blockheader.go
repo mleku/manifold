@@ -3,7 +3,7 @@ package wire
 import (
 	"time"
 
-	"github.com/mleku/manifold/ec/chainhash"
+	"manifold.mleku.dev/ec/chainhash"
 )
 
 // BlockHeader defines information about a block and is used in the bitcoin

@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mleku/manifold/ec/wire"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/wire"
 )
 
 var (
@@ -86,7 +87,7 @@ func (m *MedianTimeDeploymentStarter) HasStarted(blkHeader *wire.BlockHeader) (b
 		return true, nil
 	}
 	medianTime, err := m.blockClock.PastMedianTime(blkHeader)
-	if err != nil {
+	if chk.E(err) {
 		return false, err
 	}
 	// We check both after and equal here as after will fail for equivalent
@@ -125,7 +126,7 @@ func (m *MedianTimeDeploymentEnder) HasEnded(blkHeader *wire.BlockHeader) (bool,
 		return false, nil
 	}
 	medianTime, err := m.blockClock.PastMedianTime(blkHeader)
-	if err != nil {
+	if chk.E(err) {
 		return false, err
 	}
 	// We check both after and equal here as after will fail for equivalent

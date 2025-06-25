@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/mleku/manifold/ec/base58"
+	"manifold.mleku.dev/ec/base58"
 )
 
 var (

@@ -7,8 +7,8 @@ import (
 
 	"github.com/templexxx/xhex"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/errorf"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/errorf"
 )
 
 var Enc = hex.EncodeToString

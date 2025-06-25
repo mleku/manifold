@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mleku/manifold/chk"
+	"manifold.mleku.dev/chk"
 )
 
 var (

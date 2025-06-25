@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/exp/constraints"
 
-	"github.com/mleku/manifold/errorf"
+	"manifold.mleku.dev/errorf"
 )
 
 // run this to regenerate (pointlessly) the base 10 array of 4 places per entry

@@ -4,12 +4,12 @@ package p256k
 
 import "C"
 import (
-	"github.com/mleku/manifold/chk"
-	btcec "github.com/mleku/manifold/ec"
-	"github.com/mleku/manifold/ec/secp256k1"
-	"github.com/mleku/manifold/errorf"
-	"github.com/mleku/manifold/log"
-	realy "github.com/mleku/manifold/signer"
+	"manifold.mleku.dev/chk"
+	btcec "manifold.mleku.dev/ec"
+	"manifold.mleku.dev/ec/secp256k1"
+	"manifold.mleku.dev/errorf"
+	"manifold.mleku.dev/log"
+	realy "manifold.mleku.dev/signer"
 )
 
 func init() {

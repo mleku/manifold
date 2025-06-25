@@ -6,7 +6,8 @@ package btcec
 import (
 	"fmt"
 
-	"github.com/mleku/manifold/ec/secp256k1"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/secp256k1"
 )
 
 // JacobianPoint is an element of the group formed by the secp256k1 curve in
@@ -81,7 +82,7 @@ func ParseJacobian(point []byte) (JacobianPoint, error) {
 		return infinityPoint, nil
 	}
 	noncePk, err := secp256k1.ParsePubKey(point)
-	if err != nil {
+	if chk.E(err) {
 		return JacobianPoint{}, err
 	}
 	noncePk.AsJacobian(&result)

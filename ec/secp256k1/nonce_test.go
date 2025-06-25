@@ -10,8 +10,9 @@ import (
 	"testing"
 
 	"github.com/minio/sha256-simd"
+	"manifold.mleku.dev/chk"
 
-	"github.com/mleku/manifold/hex"
+	"manifold.mleku.dev/hex"
 )
 
 // hexToBytes converts the passed hex string into bytes and will panic if there
@@ -20,7 +21,7 @@ import (
 // hard-coded values.
 func hexToBytes(s string) []byte {
 	b, err := hex.Dec(s)
-	if err != nil {
+	if chk.E(err) {
 		panic("invalid hex in source file: " + s)
 	}
 	return b

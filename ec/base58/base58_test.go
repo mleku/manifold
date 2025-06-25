@@ -9,7 +9,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/mleku/manifold/ec/base58"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/base58"
 )
 
 var stringTests = []struct {
@@ -86,7 +87,7 @@ func TestBase58(t *testing.T) {
 	// Decode tests
 	for x, test := range hexTests {
 		b, err := hex.DecodeString(test.in)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("hex.DecodeString failed failed #%d: got: %s", x, test.in)
 			continue
 		}

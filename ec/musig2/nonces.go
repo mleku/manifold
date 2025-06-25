@@ -9,10 +9,10 @@ import (
 	"errors"
 	"io"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/ec"
-	"github.com/mleku/manifold/ec/chainhash"
-	"github.com/mleku/manifold/ec/schnorr"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec"
+	"manifold.mleku.dev/ec/chainhash"
+	"manifold.mleku.dev/ec/schnorr"
 )
 
 const (
@@ -242,12 +242,12 @@ func genNonceAuxBytes(rand []byte, pubkey []byte, i int,
 	}
 	// Next, we'll write out: len(pk) || pk
 	err := writeBytesPrefix(&w, pubkey, uint8Writer)
-	if err != nil {
+	if chk.E(err) {
 		return nil, err
 	}
 	// Next, we'll write out: len(aggpk) || aggpk.
 	err = writeBytesPrefix(&w, opts.combinedKey, uint8Writer)
-	if err != nil {
+	if chk.E(err) {
 		return nil, err
 	}
 	switch {
@@ -267,13 +267,13 @@ func genNonceAuxBytes(rand []byte, pubkey []byte, i int,
 			return nil, err
 		}
 		err = writeBytesPrefix(&w, opts.msg, uint64Writer)
-		if err != nil {
+		if chk.E(err) {
 			return nil, err
 		}
 	}
 	// Finally we'll write out the auxiliary input.
 	err = writeBytesPrefix(&w, opts.auxInput, uint32Writer)
-	if err != nil {
+	if chk.E(err) {
 		return nil, err
 	}
 	// Next we'll write out the interaction/index number which will
@@ -316,11 +316,11 @@ func GenNonces(options ...NonceGenOption) (*Nonces, error) {
 	// Using our randomness, pubkey and the set of optional params, generate our
 	// two secret nonces: k1 and k2.
 	k1, err := genNonceAuxBytes(randBytes[:], opts.publicKey, 0, opts)
-	if err != nil {
+	if chk.E(err) {
 		return nil, err
 	}
 	k2, err := genNonceAuxBytes(randBytes[:], opts.publicKey, 1, opts)
-	if err != nil {
+	if chk.E(err) {
 		return nil, err
 	}
 	var k1Mod, k2Mod btcec.ModNScalar
@@ -358,7 +358,7 @@ func AggregateNonces(pubNonces [][PubNonceSize]byte) ([PubNonceSize]byte,
 			// decode.
 			var nonceJ btcec.JacobianPoint
 			nonceJ, err := btcec.ParseJacobian(slicer(pubNonceBytes))
-			if err != nil {
+			if chk.E(err) {
 				return btcec.JacobianPoint{}, err
 			}
 			pubNonceJs[i] = &nonceJ
@@ -381,13 +381,13 @@ func AggregateNonces(pubNonces [][PubNonceSize]byte) ([PubNonceSize]byte,
 	combinedNonce1, err := combineNonces(func(n [PubNonceSize]byte) []byte {
 		return n[:btcec.PubKeyBytesLenCompressed]
 	})
-	if err != nil {
+	if chk.E(err) {
 		return finalNonce, err
 	}
 	combinedNonce2, err := combineNonces(func(n [PubNonceSize]byte) []byte {
 		return n[btcec.PubKeyBytesLenCompressed:]
 	})
-	if err != nil {
+	if chk.E(err) {
 		return finalNonce, err
 	}
 	copy(finalNonce[:], btcec.JacobianToByteSlice(combinedNonce1))

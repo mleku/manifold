@@ -6,12 +6,12 @@ import (
 	"crypto/rand"
 	"unsafe"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/ec/schnorr"
-	"github.com/mleku/manifold/ec/secp256k1"
-	"github.com/mleku/manifold/errorf"
-	"github.com/mleku/manifold/log"
-	"github.com/mleku/manifold/sha256"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/schnorr"
+	"manifold.mleku.dev/ec/secp256k1"
+	"manifold.mleku.dev/errorf"
+	"manifold.mleku.dev/log"
+	"manifold.mleku.dev/sha256"
 )
 
 /*

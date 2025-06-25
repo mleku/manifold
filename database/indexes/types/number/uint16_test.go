@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"lukechampine.com/frand"
+	"manifold.mleku.dev/chk"
 )
 
 func TestUint16(t *testing.T) {
@@ -40,7 +41,7 @@ func TestUint16(t *testing.T) {
 
 		// MarshalWrite
 		err := encodedUint16.MarshalWrite(bufEnc)
-		if err != nil {
+		if chk.E(err) {
 			t.Fatalf("MarshalWrite failed: %v", err)
 		}
 		encoded := bufEnc.Bytes()
@@ -51,7 +52,7 @@ func TestUint16(t *testing.T) {
 		// Decode back the value
 		decodedUint16 := new(Uint16)
 		err = decodedUint16.UnmarshalRead(bufDec)
-		if err != nil {
+		if chk.E(err) {
 			t.Fatalf("UnmarshalRead failed: %v", err)
 		}
 

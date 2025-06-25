@@ -64,12 +64,12 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/mleku/manifold/chk"
+	"manifold.mleku.dev/chk"
 )
 
 func main() {
 	log.SetFlags(0)
-	if err := run(os.Args[1:]); err != nil {
+	if err := run(os.Args[1:]); chk.E(err) {
 		log.Fatalf("%+v", err)
 	}
 }
@@ -138,7 +138,7 @@ func run(args []string) (err error) {
 	fl.BoolVar(&opts.JSON, "json", false,
 		"generate `Marshal/UnmarshJSON` methods")
 
-	if err = fl.Parse(args); err != nil {
+	if err = fl.Parse(args); chk.E(err) {
 		return err
 	}
 
@@ -158,7 +158,7 @@ func run(args []string) (err error) {
 	if file := opts.File; len(file) > 0 {
 		var f *os.File
 		f, err = os.Create(file)
-		if err != nil {
+		if chk.E(err) {
 			return fmt.Errorf("create %q: %v", file, err)
 		}
 		defer func() { _ = f.Close() }()
@@ -184,11 +184,11 @@ func run(args []string) (err error) {
 	sort.Strings(opts.Imports)
 
 	var buff bytes.Buffer
-	if err = _tmpl.ExecuteTemplate(&buff, "wrapper.tmpl", opts); err != nil {
+	if err = _tmpl.ExecuteTemplate(&buff, "wrapper.tmpl", opts); chk.E(err) {
 		return fmt.Errorf("render template: %v", err)
 	}
 	var bs []byte
-	if bs, err = format.Source(buff.Bytes()); err != nil {
+	if bs, err = format.Source(buff.Bytes()); chk.E(err) {
 		return fmt.Errorf("reformat source: %v", err)
 	}
 

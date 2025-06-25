@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"manifold.mleku.dev/chk"
 )
 
 // TestBech32 tests whether decoding and re-encoding the valid BIP-173 test
@@ -69,13 +71,13 @@ func TestBech32(t *testing.T) {
 				"instead got %v", i, test.expectedError, err)
 			continue
 		}
-		if err != nil {
+		if chk.E(err) {
 			// End test case here if a decoding error was expected.
 			continue
 		}
 		// Check that it encodes to the same string
 		encoded, err := Encode(hrp, decoded)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("encoding failed: %v", err)
 		}
 		if !bytes.Equal(encoded, bytes.ToLower([]byte(str))) {
@@ -86,7 +88,7 @@ func TestBech32(t *testing.T) {
 		pos := bytes.LastIndexAny(str, "1")
 		flipped := []byte(string(str[:pos+1]) + string(str[pos+1]^1) + string(str[pos+2:]))
 		_, _, err = Decode(flipped)
-		if err == nil {
+		if !chk.E(err) {
 			t.Error("expected decoding to fail")
 		}
 	}
@@ -140,13 +142,13 @@ func TestBech32M(t *testing.T) {
 				err)
 			continue
 		}
-		if err != nil {
+		if chk.E(err) {
 			// End test case here if a decoding error was expected.
 			continue
 		}
 		// Check that it encodes to the same string, using bech32 m.
 		encoded, err := EncodeM(hrp, decoded)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("encoding failed: %v", err)
 		}
 
@@ -158,7 +160,7 @@ func TestBech32M(t *testing.T) {
 		pos := bytes.LastIndexAny(str, "1")
 		flipped := []byte(string(str[:pos+1]) + string(str[pos+1]^1) + string(str[pos+2:]))
 		_, _, err = Decode(flipped)
-		if err == nil {
+		if !chk.E(err) {
 			t.Error("expected decoding to fail")
 		}
 	}
@@ -207,7 +209,7 @@ func TestBech32DecodeGeneric(t *testing.T) {
 	}
 	for i, test := range tests {
 		_, _, version, err := DecodeGeneric([]byte(test.str))
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("%d: (%v) unexpected error during "+
 				"decoding: %v", i, test.str, err)
 			continue
@@ -259,18 +261,18 @@ func TestMixedCaseEncode(t *testing.T) {
 		// base32, then ensure the encoded result with the HRP provided in the
 		// test data is as expected.
 		data, err := hex.DecodeString(test.data)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("%q: invalid hex %q: %v", test.name, test.data, err)
 			continue
 		}
 		convertedData, err := ConvertBits(data, 8, 5, true)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("%q: unexpected convert bits error: %v", test.name,
 				err)
 			continue
 		}
 		gotEncoded, err := Encode([]byte(test.hrp), convertedData)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("%q: unexpected encode error: %v", test.name, err)
 			continue
 		}
@@ -282,7 +284,7 @@ func TestMixedCaseEncode(t *testing.T) {
 		// Ensure the decoding the expected lowercase encoding converted to all
 		// uppercase produces the lowercase HRP and original data.
 		gotHRP, gotData, err := Decode(bytes.ToUpper([]byte(test.encoded)))
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("%q: unexpected decode error: %v", test.name, err)
 			continue
 		}
@@ -293,7 +295,7 @@ func TestMixedCaseEncode(t *testing.T) {
 			continue
 		}
 		convertedGotData, err := ConvertBits(gotData, 5, 8, false)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("%q: unexpected convert bits error: %v", test.name,
 				err)
 			continue
@@ -312,12 +314,12 @@ func TestCanDecodeUnlimtedBech32(t *testing.T) {
 	input := "11qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq5kx0yd"
 	// Sanity check that an input of this length errors on regular Decode()
 	_, _, err := Decode([]byte(input))
-	if err == nil {
+	if !chk.E(err) {
 		t.Fatalf("Test vector not appropriate")
 	}
 	// Try and decode it.
 	hrp, data, err := DecodeNoLimit([]byte(input))
-	if err != nil {
+	if chk.E(err) {
 		t.Fatalf("Expected decoding of large string to work. Got error: %v",
 			err)
 	}
@@ -418,7 +420,7 @@ func TestBech32Base256(t *testing.T) {
 				test.name, err, test.err)
 			continue
 		}
-		if err != nil {
+		if chk.E(err) {
 			// End test case here if a decoding error was expected.
 			continue
 		}
@@ -429,7 +431,7 @@ func TestBech32Base256(t *testing.T) {
 			continue
 		}
 		data, err := hex.DecodeString(test.data)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("%q: invalid hex %q: %v", test.name, test.data, err)
 			continue
 		}
@@ -442,7 +444,7 @@ func TestBech32Base256(t *testing.T) {
 		// ensure the result is the lowercase version of the original encoded
 		// bech32 string.
 		gotEncoded, err := EncodeFromBase256(bytes.ToUpper([]byte(test.hrp)), data)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("%q: unexpected uppercase HRP encode error: %v", test.name,
 				err)
 		}
@@ -455,7 +457,7 @@ func TestBech32Base256(t *testing.T) {
 		// ensure the result is the lowercase version of the original encoded
 		// bech32 string.
 		gotEncoded, err = EncodeFromBase256(bytes.ToLower([]byte(test.hrp)), data)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("%q: unexpected lowercase HRP encode error: %v", test.name,
 				err)
 		}
@@ -475,7 +477,7 @@ func TestBech32Base256(t *testing.T) {
 			mixedHRPBuilder.WriteRune(r)
 		}
 		gotEncoded, err = EncodeFromBase256(mixedHRPBuilder.Bytes(), data)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("%q: unexpected lowercase HRP encode error: %v", test.name,
 				err)
 		}
@@ -487,7 +489,7 @@ func TestBech32Base256(t *testing.T) {
 		pos := strings.LastIndexAny(test.encoded, "1")
 		flipped := str[:pos+1] + string(str[pos+1]^1) + str[pos+2:]
 		_, _, err = DecodeToBase256([]byte(flipped))
-		if err == nil {
+		if !chk.E(err) {
 			t.Error("expected decoding to fail")
 		}
 	}
@@ -499,12 +501,12 @@ func TestBech32Base256(t *testing.T) {
 func BenchmarkEncodeDecodeCycle(b *testing.B) {
 	// Use a fixed, 49-byte raw data for testing.
 	inputData, err := hex.DecodeString("cbe6365ddbcda9a9915422c3f091c13f8c7b2f263b8d34067bd12c274408473fa764871c9dd51b1bb34873b3473b633ed1")
-	if err != nil {
+	if chk.E(err) {
 		b.Fatalf("failed to initialize input data: %v", err)
 	}
 	// Convert this into a 79-byte, base 32 byte slice.
 	base32Input, err := ConvertBits(inputData, 8, 5, true)
-	if err != nil {
+	if chk.E(err) {
 		b.Fatalf("failed to convert input to 32 bits-per-element: %v", err)
 	}
 	// Use a fixed hrp for the tests. This should generate an encoded bech32
@@ -517,11 +519,11 @@ func BenchmarkEncodeDecodeCycle(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		str, err := Encode([]byte(hrp), base32Input)
-		if err != nil {
+		if chk.E(err) {
 			b.Fatalf("failed to encode input: %v", err)
 		}
 		_, _, err = Decode(str)
-		if err != nil {
+		if chk.E(err) {
 			b.Fatalf("failed to decode string: %v", err)
 		}
 	}
@@ -579,15 +581,15 @@ func TestConvertBits(t *testing.T) {
 	}
 	for i, tc := range tests {
 		input, err := hex.DecodeString(tc.input)
-		if err != nil {
+		if chk.E(err) {
 			t.Fatalf("invalid test input data: %v", err)
 		}
 		expected, err := hex.DecodeString(tc.output)
-		if err != nil {
+		if chk.E(err) {
 			t.Fatalf("invalid test output data: %v", err)
 		}
 		actual, err := ConvertBits(input, tc.fromBits, tc.toBits, tc.pad)
-		if err != nil {
+		if chk.E(err) {
 			t.Fatalf("test case %d failed: %v", i, err)
 		}
 		if !bytes.Equal(actual, expected) {
@@ -618,7 +620,7 @@ func TestConvertBitsFailures(t *testing.T) {
 	}
 	for i, tc := range tests {
 		input, err := hex.DecodeString(tc.input)
-		if err != nil {
+		if chk.E(err) {
 			t.Fatalf("invalid test input data: %v", err)
 		}
 		_, err = ConvertBits(input, tc.fromBits, tc.toBits, tc.pad)
@@ -637,14 +639,14 @@ func TestConvertBitsFailures(t *testing.T) {
 func BenchmarkConvertBitsDown(b *testing.B) {
 	// Use a fixed, 49-byte raw data for testing.
 	inputData, err := hex.DecodeString("cbe6365ddbcda9a9915422c3f091c13f8c7b2f263b8d34067bd12c274408473fa764871c9dd51b1bb34873b3473b633ed1")
-	if err != nil {
+	if chk.E(err) {
 		b.Fatalf("failed to initialize input data: %v", err)
 	}
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := ConvertBits(inputData, 8, 5, true)
-		if err != nil {
+		if chk.E(err) {
 			b.Fatalf("error converting bits: %v", err)
 		}
 	}
@@ -658,14 +660,14 @@ func BenchmarkConvertBitsDown(b *testing.B) {
 func BenchmarkConvertBitsUp(b *testing.B) {
 	// Use a fixed, 79-byte raw data for testing.
 	inputData, err := hex.DecodeString("190f13030c170e1b1916141a13040a14040b011f01040e01071e0607160b1906070e06130801131b1a0416020e110008081c1f1a0e19040703120e1d0a06181b160d0407070c1a07070d11131d1408")
-	if err != nil {
+	if chk.E(err) {
 		b.Fatalf("failed to initialize input data: %v", err)
 	}
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := ConvertBits(inputData, 8, 5, true)
-		if err != nil {
+		if chk.E(err) {
 			b.Fatalf("error converting bits: %v", err)
 		}
 	}

@@ -11,7 +11,8 @@ package btcec
 import (
 	"testing"
 
-	"github.com/mleku/manifold/hex"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/hex"
 )
 
 func FuzzParsePubKey(f *testing.F) {
@@ -28,7 +29,7 @@ func FuzzParsePubKey(f *testing.F) {
 	}
 	for _, pubKey := range recoveryTestPubKeys {
 		seed, err := hex.Dec(pubKey)
-		if err != nil {
+		if chk.E(err) {
 			f.Fatal(err)
 		}
 		f.Add(seed)
@@ -36,10 +37,10 @@ func FuzzParsePubKey(f *testing.F) {
 	// Now run the fuzzer.
 	f.Fuzz(func(t *testing.T, input []byte) {
 		key, err := ParsePubKey(input)
-		if key == nil && err == nil {
+		if key == nil && !chk.E(err) {
 			panic("key==nil && err==nil")
 		}
-		if key != nil && err != nil {
+		if key != nil && chk.E(err) {
 			panic("key!=nil yet err!=nil")
 		}
 	})

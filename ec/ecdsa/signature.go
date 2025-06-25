@@ -8,7 +8,7 @@ package ecdsa
 import (
 	"fmt"
 
-	"github.com/mleku/manifold/ec/secp256k1"
+	"manifold.mleku.dev/ec/secp256k1"
 )
 
 // References:

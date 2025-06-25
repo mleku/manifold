@@ -5,7 +5,7 @@
 package btcec
 
 import (
-	"github.com/mleku/manifold/ec/secp256k1"
+	"manifold.mleku.dev/ec/secp256k1"
 )
 
 // GenerateSharedSecret generates a shared secret based on a secret key and a

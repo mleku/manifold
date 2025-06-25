@@ -3,6 +3,8 @@ package fulltext
 import (
 	"bytes"
 	"io"
+
+	"manifold.mleku.dev/chk"
 )
 
 type T struct {
@@ -45,10 +47,7 @@ func (ft *T) UnmarshalRead(r io.Reader) error {
 			}
 			buf.WriteByte(tmp[0])
 		}
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
+		if chk.E(err) {
 			return err // Handle unexpected errors
 		}
 	}

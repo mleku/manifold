@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mleku/manifold/chk"
+	"manifold.mleku.dev/chk"
 )
 
 func main() {

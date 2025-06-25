@@ -25,6 +25,8 @@ package atomic
 import (
 	"encoding/json"
 	"math"
+
+	"manifold.mleku.dev/chk"
 )
 
 // Float64 is an atomic type-safe wrapper for float64 values.
@@ -69,7 +71,7 @@ func (x *Float64) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON decodes a float64 from JSON.
 func (x *Float64) UnmarshalJSON(b []byte) error {
 	var v float64
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(b, &v); chk.E(err) {
 		return err
 	}
 	x.Store(v)

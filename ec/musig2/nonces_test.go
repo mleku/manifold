@@ -11,8 +11,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"manifold.mleku.dev/chk"
 
-	"github.com/mleku/manifold/hex"
+	"manifold.mleku.dev/hex"
 )
 
 type nonceGenTestCase struct {
@@ -59,7 +60,7 @@ func TestMusig2NonceGenTestVectors(t *testing.T) {
 		}
 		t.Run(fmt.Sprintf("test_case=%v", i), func(t *testing.T) {
 			nonce, err := GenNonces(withCustomOptions(customOpts))
-			if err != nil {
+			if chk.E(err) {
 				t.Fatalf("err gen nonce aux bytes %v", err)
 			}
 			expectedBytes, _ := hex.Dec(testCase.Expected)
@@ -135,7 +136,7 @@ func TestMusig2AggregateNoncesTestVectors(t *testing.T) {
 		}
 		t.Run(fmt.Sprintf("invalid_case=%v", i), func(t *testing.T) {
 			_, err := AggregateNonces(testNonces)
-			require.True(t, err != nil)
+			require.True(t, chk.E(err))
 			require.Equal(t, testCase.ExpectedErr, err.Error())
 		})
 	}

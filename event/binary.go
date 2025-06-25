@@ -3,10 +3,10 @@ package event
 import (
 	"io"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/ec/schnorr"
-	"github.com/mleku/manifold/errorf"
-	. "github.com/mleku/manifold/varint"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/schnorr"
+	"manifold.mleku.dev/errorf"
+	. "manifold.mleku.dev/varint"
 )
 
 var ck = chk.E

@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/log"
-	"github.com/mleku/manifold/p256k/btcec"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/log"
+	"manifold.mleku.dev/p256k/btcec"
 )
 
 func TestSigner_Generate(t *testing.T) {

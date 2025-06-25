@@ -25,6 +25,8 @@ package atomic
 import (
 	"encoding/json"
 	"math"
+
+	"manifold.mleku.dev/chk"
 )
 
 // Float32 is an atomic type-safe wrapper for float32 values.
@@ -69,7 +71,7 @@ func (x *Float32) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON decodes a float32 from JSON.
 func (x *Float32) UnmarshalJSON(b []byte) error {
 	var v float32
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(b, &v); chk.E(err) {
 		return err
 	}
 	x.Store(v)

@@ -8,16 +8,18 @@ package secp256k1
 import (
 	"bytes"
 	"testing"
+
+	"manifold.mleku.dev/chk"
 )
 
 func TestGenerateSharedSecret(t *testing.T) {
 	secKey1, err := GenerateSecretKey()
-	if err != nil {
+	if chk.E(err) {
 		t.Errorf("secret key generation error: %s", err)
 		return
 	}
 	secKey2, err := GenerateSecretKey()
-	if err != nil {
+	if chk.E(err) {
 		t.Errorf("secret key generation error: %s", err)
 		return
 	}

@@ -7,8 +7,8 @@ package varint
 import (
 	"io"
 
-	"github.com/mleku/manifold/chk"
 	"golang.org/x/exp/constraints"
+	"manifold.mleku.dev/chk"
 )
 
 func Encode[V constraints.Integer](w io.Writer, v V) {

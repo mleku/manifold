@@ -10,10 +10,11 @@ import (
 	"testing"
 
 	"github.com/minio/sha256-simd"
+	"manifold.mleku.dev/chk"
 
-	"github.com/mleku/manifold/ec"
-	"github.com/mleku/manifold/ec/secp256k1"
-	"github.com/mleku/manifold/hex"
+	"manifold.mleku.dev/ec"
+	"manifold.mleku.dev/ec/secp256k1"
+	"manifold.mleku.dev/hex"
 )
 
 // hexToBytes converts the passed hex string into bytes and will panic if there
@@ -22,7 +23,7 @@ import (
 // hard-coded values.
 func hexToBytes(s string) []byte {
 	b, err := hex.Dec(s)
-	if err != nil {
+	if chk.E(err) {
 		panic("invalid hex in source file: " + s)
 	}
 	return b
@@ -34,7 +35,7 @@ func hexToBytes(s string) []byte {
 // must only) be called with hard-coded values.
 func hexToModNScalar(s string) *btcec.ModNScalar {
 	b, err := hex.Dec(s)
-	if err != nil {
+	if chk.E(err) {
 		panic("invalid hex in source file: " + s)
 	}
 	var scalar btcec.ModNScalar
@@ -50,7 +51,7 @@ func hexToModNScalar(s string) *btcec.ModNScalar {
 // called with hard-coded values.
 func hexToFieldVal(s string) *btcec.FieldVal {
 	b, err := hex.Dec(s)
-	if err != nil {
+	if chk.E(err) {
 		panic("invalid hex in source file: " + s)
 	}
 	var f btcec.FieldVal
@@ -112,7 +113,7 @@ func BenchmarkSigVerify(b *testing.B) {
 	// Double sha256 of by{0x01, 0x02, 0x03, 0x04}
 	msgHash := sha256.Sum256([]byte("benchmark"))
 	sig, err := Sign(privKey, msgHash[:])
-	if err != nil {
+	if chk.E(err) {
 		b.Fatalf("unable to sign: %v", err)
 	}
 	if !sig.Verify(msgHash[:], pubKey) {

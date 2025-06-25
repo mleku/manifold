@@ -3,6 +3,8 @@ package number
 import (
 	"errors"
 	"io"
+
+	"manifold.mleku.dev/chk"
 )
 
 // MaxUint40 is the maximum value of a 40-bit unsigned integer: 2^40 - 1.
@@ -61,7 +63,7 @@ func (c *Uint40) UnmarshalRead(r io.Reader) (err error) {
 	// Buffer for the 5 bytes
 	buf := make([]byte, 5)
 	_, err = r.Read(buf)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 	// Decode the 5 bytes into a 40-bit unsigned integer

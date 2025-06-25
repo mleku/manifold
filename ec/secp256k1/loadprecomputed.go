@@ -11,6 +11,8 @@ import (
 	"io"
 	"strings"
 	"sync"
+
+	"manifold.mleku.dev/chk"
 )
 
 //go:generate go run genprecomps.go
@@ -50,11 +52,11 @@ var s256BytePoints = func() func() *bytePointTable {
 		// multiplication.
 		decoder := base64.NewDecoder(base64.StdEncoding, strings.NewReader(bp))
 		r, err := zlib.NewReader(decoder)
-		if err != nil {
+		if chk.E(err) {
 			panic(err)
 		}
 		serialized, err := io.ReadAll(r)
-		if err != nil {
+		if chk.E(err) {
 			panic(err)
 		}
 		// Deserialize the precomputed byte points and set the memory table to

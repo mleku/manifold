@@ -8,7 +8,7 @@ import (
 
 	"github.com/kardianos/osext"
 
-	"github.com/mleku/manifold/log"
+	"manifold.mleku.dev/log"
 )
 
 // Restart uses syscall.Exec to restart the process. MacOS and Windows are not implemented,

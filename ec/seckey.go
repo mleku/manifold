@@ -5,7 +5,7 @@
 package btcec
 
 import (
-	"github.com/mleku/manifold/ec/secp256k1"
+	"manifold.mleku.dev/ec/secp256k1"
 )
 
 // SecretKey wraps an ecdsa.SecretKey as a convenience mainly for signing things with the secret key without having to

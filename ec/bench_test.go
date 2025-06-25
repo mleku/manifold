@@ -8,8 +8,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/mleku/manifold/ec/secp256k1"
-	"github.com/mleku/manifold/hex"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/secp256k1"
+	"manifold.mleku.dev/hex"
 )
 
 // setHex decodes the passed big-endian hex string into the internal field value
@@ -35,7 +36,7 @@ func setHex(hexString string) *FieldVal {
 // called with hard-coded values.
 func hexToFieldVal(s string) *FieldVal {
 	b, err := hex.Dec(s)
-	if err != nil {
+	if chk.E(err) {
 		panic("invalid hex in source file: " + s)
 	}
 	var f FieldVal
@@ -149,7 +150,7 @@ func BenchmarkScalarMult(b *testing.B) {
 // must only) be called with hard-coded values.
 func hexToModNScalar(s string) *ModNScalar {
 	b, err := hex.Dec(s)
-	if err != nil {
+	if chk.E(err) {
 		panic("invalid hex in source file: " + s)
 	}
 	var scalar ModNScalar

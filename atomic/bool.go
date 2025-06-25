@@ -24,6 +24,8 @@ package atomic
 
 import (
 	"encoding/json"
+
+	"manifold.mleku.dev/chk"
 )
 
 // Bool is an atomic type-safe wrapper for bool values.
@@ -80,7 +82,7 @@ func (x *Bool) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON decodes a bool from JSON.
 func (x *Bool) UnmarshalJSON(b []byte) error {
 	var v bool
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(b, &v); chk.E(err) {
 		return err
 	}
 	x.Store(v)

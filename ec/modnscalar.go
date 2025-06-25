@@ -4,7 +4,7 @@
 package btcec
 
 import (
-	"github.com/mleku/manifold/ec/secp256k1"
+	"manifold.mleku.dev/ec/secp256k1"
 )
 
 // ModNScalar implements optimized 256-bit constant-time fixed-precision

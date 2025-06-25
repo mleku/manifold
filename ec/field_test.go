@@ -9,8 +9,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/hex"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/hex"
 )
 
 // TestIsZero ensures that checking if a field IsZero works as expected.
@@ -1035,7 +1035,7 @@ func TestFieldSquareRoot(t *testing.T) {
 // hard-coded values.
 func hexToBytes(s string) []byte {
 	b, err := hex.Dec(s)
-	if err != nil {
+	if chk.E(err) {
 		panic("invalid hex in source file: " + s)
 	}
 	return b

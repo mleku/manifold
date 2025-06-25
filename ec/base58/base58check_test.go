@@ -7,7 +7,8 @@ package base58_test
 import (
 	"testing"
 
-	"github.com/mleku/manifold/ec/base58"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/base58"
 )
 
 var checkEncodingStringTests = []struct {
@@ -42,7 +43,7 @@ func TestBase58Check(t *testing.T) {
 		// test decoding
 		res, version, err := base58.CheckDecode(test.out)
 		switch {
-		case err != nil:
+		case chk.E(err):
 			t.Errorf("CheckDecode test #%d failed with err: %v", x, err)
 
 		case version != test.version:

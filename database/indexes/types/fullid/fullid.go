@@ -5,7 +5,7 @@ import (
 
 	"github.com/minio/sha256-simd"
 
-	"github.com/mleku/manifold/errorf"
+	"manifold.mleku.dev/errorf"
 )
 
 const Len = sha256.Size

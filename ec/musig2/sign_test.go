@@ -12,10 +12,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"manifold.mleku.dev/chk"
 
-	"github.com/mleku/manifold/ec"
-	"github.com/mleku/manifold/ec/secp256k1"
-	"github.com/mleku/manifold/hex"
+	"manifold.mleku.dev/ec"
+	"manifold.mleku.dev/ec/secp256k1"
+	"manifold.mleku.dev/hex"
 )
 
 const (
@@ -119,7 +120,7 @@ func TestMusig2SignVerify(t *testing.T) {
 			pubKeys, err := keysFromIndices(
 				t, testCase.Indices, testCases.PubKeys,
 			)
-			if err != nil {
+			if chk.E(err) {
 				require.ErrorIs(t, err, secp256k1.ErrPubKeyNotOnCurve)
 				return
 			}
@@ -172,7 +173,7 @@ func TestMusig2SignVerify(t *testing.T) {
 			err = partialSig.Decode(
 				bytes.NewReader(mustParseHex(testCase.Sig)),
 			)
-			if err != nil && strings.Contains(testCase.Comment, "group size") {
+			if chk.E(err) && strings.Contains(testCase.Comment, "group size") {
 				require.ErrorIs(t, err, ErrPartialSigInvalid)
 			}
 			err = verifyPartialSig(

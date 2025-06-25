@@ -4,14 +4,14 @@ import (
 	"io"
 	"reflect"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/codec"
-	"github.com/mleku/manifold/database/indexes/types/fullid"
-	"github.com/mleku/manifold/database/indexes/types/fulltext"
-	"github.com/mleku/manifold/database/indexes/types/identhash"
-	"github.com/mleku/manifold/database/indexes/types/idhash"
-	. "github.com/mleku/manifold/database/indexes/types/number"
-	"github.com/mleku/manifold/database/indexes/types/pubhash"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/codec"
+	"manifold.mleku.dev/database/indexes/types/fullid"
+	"manifold.mleku.dev/database/indexes/types/fulltext"
+	"manifold.mleku.dev/database/indexes/types/identhash"
+	"manifold.mleku.dev/database/indexes/types/idhash"
+	. "manifold.mleku.dev/database/indexes/types/number"
+	"manifold.mleku.dev/database/indexes/types/pubhash"
 )
 
 type P struct {

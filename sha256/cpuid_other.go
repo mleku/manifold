@@ -21,6 +21,7 @@ import (
 	"runtime"
 
 	"github.com/klauspost/cpuid/v2"
+	"manifold.mleku.dev/chk"
 )
 
 var (
@@ -45,7 +46,7 @@ func hasArmSha2() bool {
 	const sha256Feature = "sha2"
 
 	cpuInfo, err := os.ReadFile(procCPUInfo)
-	if err != nil {
+	if chk.E(err) {
 		return false
 	}
 	return bytes.Contains(cpuInfo, []byte(sha256Feature))

@@ -7,6 +7,8 @@ package chainhash
 import (
 	"bytes"
 	"testing"
+
+	"manifold.mleku.dev/chk"
 )
 
 // mainNetGenesisHash is the hash of the first block in the block chain for the
@@ -23,7 +25,7 @@ func TestHash(t *testing.T) {
 	// Hash of block 234439.
 	blockHashStr := "14a0810ac680a3eb3f82edc878cea25ec41d6b790744e5daeef"
 	blockHash, err := NewHashFromStr(blockHashStr)
-	if err != nil {
+	if chk.E(err) {
 		t.Errorf("NewHashFromStr: %v", err)
 	}
 	// Hash of block 234440 as byte slice.
@@ -34,7 +36,7 @@ func TestHash(t *testing.T) {
 		0xa6, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	}
 	hash, err := NewHash(buf)
-	if err != nil {
+	if chk.E(err) {
 		t.Errorf("NewHash: unexpected error %v", err)
 	}
 	// Ensure proper size.
@@ -54,7 +56,7 @@ func TestHash(t *testing.T) {
 	}
 	// Set hash from byte slice and ensure contents match.
 	err = hash.SetBytes(blockHash.CloneBytes())
-	if err != nil {
+	if chk.E(err) {
 		t.Errorf("SetBytes: %v", err)
 	}
 	if !hash.IsEqual(blockHash) {
@@ -70,13 +72,13 @@ func TestHash(t *testing.T) {
 	}
 	// Invalid size for SetBytes.
 	err = hash.SetBytes([]byte{0x00})
-	if err == nil {
+	if !chk.E(err) {
 		t.Errorf("SetBytes: failed to received expected err - got: nil")
 	}
 	// Invalid size for NewHash.
 	invalidHash := make([]byte, HashSize+1)
 	_, err = NewHash(invalidHash)
-	if err == nil {
+	if !chk.E(err) {
 		t.Errorf("NewHash: failed to received expected err - got: nil")
 	}
 }
@@ -168,7 +170,7 @@ func TestHashString(t *testing.T) {
 // 		if err != test.err {
 // 			t.Errorf(unexpectedErrStr, i, err, test.err)
 // 			continue
-// 		} else if err != nil {
+// 		} else if chk.E(err) {
 // 			// Got expected error. Move on to the next test.
 // 			continue
 // 		}
@@ -184,16 +186,16 @@ func TestHashString(t *testing.T) {
 // 	hashStr := "000000000003ba27aa200b1cecaad478d2b00432346c3f1f3986da1afd33e506"
 // 	legacyHashStr := []byte("[6,229,51,253,26,218,134,57,31,63,108,52,50,4,176,210,120,212,170,236,28,11,32,170,39,186,3,0,0,0,0,0]")
 // 	hash, err := NewHashFromStr(hashStr)
-// 	if err != nil {
+// 	if chk.E(err) {
 // 		t.Errorf("NewHashFromStr error:%v, hashStr:%s", err, hashStr)
 // 	}
 // 	hashBytes, err := json.Marshal(hash)
-// 	if err != nil {
+// 	if chk.E(err) {
 // 		t.Errorf("Marshal json error:%v, hash:%v", err, hashBytes)
 // 	}
 // 	var newHash Hash
 // 	err = json.Unmarshal(hashBytes, &newHash)
-// 	if err != nil {
+// 	if chk.E(err) {
 // 		t.Errorf("Unmarshal json error:%v, hash:%v", err, hashBytes)
 // 	}
 // 	if !hash.IsEqual(&newHash) {
@@ -201,7 +203,7 @@ func TestHashString(t *testing.T) {
 // 			newHash.String(), hashStr)
 // 	}
 // 	err = newHash.Unmarshal(legacyHashStr)
-// 	if err != nil {
+// 	if chk.E(err) {
 // 		t.Errorf("Unmarshal legacy json error:%v, hash:%v", err, legacyHashStr)
 // 	}
 // 	if !hash.IsEqual(&newHash) {

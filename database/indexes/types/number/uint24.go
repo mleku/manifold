@@ -3,6 +3,8 @@ package number
 import (
 	"errors"
 	"io"
+
+	"manifold.mleku.dev/chk"
 )
 
 // MaxUint24 is the maximum value of a 24-bit unsigned integer: 2^24 - 1.
@@ -65,7 +67,7 @@ func (c *Uint24) UnmarshalRead(r io.Reader) error {
 	// Read 3 bytes directly from the reader
 	var buf [3]byte
 	_, err := io.ReadFull(r, buf[:]) // Ensure exactly 3 bytes are read
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 

@@ -26,6 +26,8 @@ import (
 	"encoding/json"
 	"strconv"
 	"sync/atomic"
+
+	"manifold.mleku.dev/chk"
 )
 
 // Int64 is an atomic wrapper around int64.
@@ -95,7 +97,7 @@ func (i *Int64) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON decodes JSON into the wrapped int64.
 func (i *Int64) UnmarshalJSON(b []byte) error {
 	var v int64
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(b, &v); chk.E(err) {
 		return err
 	}
 	i.Store(v)

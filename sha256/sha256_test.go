@@ -59,7 +59,7 @@ import (
 	"strings"
 	"testing"
 
-	"realy.lol/chk"
+	"manifold.mleku.dev/chk"
 )
 
 type sha256Test struct {
@@ -2437,7 +2437,7 @@ func TestGoldenMarshal(t *testing.T) {
 				io.WriteString(h, g.in[:len(g.in)/2])
 
 				state, err := h.(encoding.BinaryMarshaler).MarshalBinary()
-				if err != nil {
+				if chk.E(err) {
 					t.Errorf("could not marshal: %v", err)
 					continue
 				}
@@ -2517,7 +2517,7 @@ func TestLargeHashes(t *testing.T) {
 		}
 
 		sum, err := safeSum(h)
-		if err != nil {
+		if chk.E(err) {
 			t.Errorf("test %d could not sum: %v", i, err)
 			continue
 		}

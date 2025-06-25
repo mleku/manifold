@@ -26,6 +26,8 @@ import (
 	"encoding/json"
 	"strconv"
 	"sync/atomic"
+
+	"manifold.mleku.dev/chk"
 )
 
 // Uint64 is an atomic wrapper around uint64.
@@ -95,7 +97,7 @@ func (i *Uint64) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON decodes JSON into the wrapped uint64.
 func (i *Uint64) UnmarshalJSON(b []byte) error {
 	var v uint64
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(b, &v); chk.E(err) {
 		return err
 	}
 	i.Store(v)

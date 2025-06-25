@@ -5,9 +5,9 @@ package musig2
 import (
 	"fmt"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/ec"
-	"github.com/mleku/manifold/ec/schnorr"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec"
+	"manifold.mleku.dev/ec/schnorr"
 )
 
 var (
@@ -208,7 +208,7 @@ func NewContext(signingKey *btcec.SecretKey, shouldSort bool,
 			WithPublicKey(ctx.pubKey),
 			WithNonceSecretKeyAux(signingKey),
 		)
-		if err != nil {
+		if chk.E(err) {
 			return nil, err
 		}
 	}
@@ -260,7 +260,7 @@ func (c *Context) combineSignerKeys() error {
 	c.combinedKey, _, _, err = AggregateKeys(
 		c.opts.keySet, c.shouldSort, keyAggOpts...,
 	)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 	return nil
@@ -419,7 +419,7 @@ func (c *Context) NewSession(options ...SessionOption) (*Session, error) {
 			WithNonceSecretKeyAux(c.signingKey),
 			WithNonceCombinedKeyAux(c.combinedKey.FinalKey),
 		)
-		if err != nil {
+		if chk.E(err) {
 			return nil, err
 		}
 	}
@@ -463,7 +463,7 @@ func (s *Session) RegisterPubNonce(nonce [PubNonceSize]byte) (bool, error) {
 	// now.
 	if haveAllNonces {
 		combinedNonce, err := AggregateNonces(s.pubNonces)
-		if err != nil {
+		if chk.E(err) {
 			return false, err
 		}
 		s.combinedNonce = &combinedNonce
@@ -506,7 +506,7 @@ func (s *Session) Sign(msg [32]byte,
 	// Now that we've generated our signature, we'll make sure to blank out
 	// our signing nonce.
 	s.localNonces = nil
-	if err != nil {
+	if chk.E(err) {
 		return nil, err
 	}
 	s.msg = msg

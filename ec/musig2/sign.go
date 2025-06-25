@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/ec"
-	"github.com/mleku/manifold/ec/chainhash"
-	"github.com/mleku/manifold/ec/schnorr"
-	"github.com/mleku/manifold/ec/secp256k1"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec"
+	"manifold.mleku.dev/ec/chainhash"
+	"manifold.mleku.dev/ec/schnorr"
+	"manifold.mleku.dev/ec/secp256k1"
 )
 
 var (
@@ -219,13 +219,13 @@ func computeSigningNonce(combinedNonce [PubNonceSize]byte,
 	r1J, err := btcec.ParseJacobian(
 		combinedNonce[:btcec.PubKeyBytesLenCompressed],
 	)
-	if err != nil {
+	if chk.E(err) {
 		return nil, nil, err
 	}
 	r2J, err := btcec.ParseJacobian(
 		combinedNonce[btcec.PubKeyBytesLenCompressed:],
 	)
-	if err != nil {
+	if chk.E(err) {
 		return nil, nil, err
 	}
 
@@ -305,7 +305,7 @@ func Sign(secNonce [SecNonceSize]byte, privKey *btcec.SecretKey,
 	combinedKey, parityAcc, _, err := AggregateKeys(
 		pubKeys, opts.sortKeys, keyAggOpts...,
 	)
-	if err != nil {
+	if chk.E(err) {
 		return nil, err
 	}
 
@@ -315,7 +315,7 @@ func Sign(secNonce [SecNonceSize]byte, privKey *btcec.SecretKey,
 	nonce, nonceBlinder, err := computeSigningNonce(
 		combinedNonce, combinedKey.FinalKey, msg,
 	)
-	if err != nil {
+	if chk.E(err) {
 		return nil, err
 	}
 
@@ -462,7 +462,7 @@ func verifyPartialSig(partialSig *PartialSignature, pubNonce [PubNonceSize]byte,
 	combinedKey, parityAcc, _, err := AggregateKeys(
 		keySet, opts.sortKeys, keyAggOpts...,
 	)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 
@@ -482,13 +482,13 @@ func verifyPartialSig(partialSig *PartialSignature, pubNonce [PubNonceSize]byte,
 	r1J, err := btcec.ParseJacobian(
 		combinedNonce[:btcec.PubKeyBytesLenCompressed],
 	)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 	r2J, err := btcec.ParseJacobian(
 		combinedNonce[btcec.PubKeyBytesLenCompressed:],
 	)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 
@@ -504,13 +504,13 @@ func verifyPartialSig(partialSig *PartialSignature, pubNonce [PubNonceSize]byte,
 	pubNonce1J, err := btcec.ParseJacobian(
 		pubNonce[:btcec.PubKeyBytesLenCompressed],
 	)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 	pubNonce2J, err := btcec.ParseJacobian(
 		pubNonce[btcec.PubKeyBytesLenCompressed:],
 	)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 
@@ -553,7 +553,7 @@ func verifyPartialSig(partialSig *PartialSignature, pubNonce [PubNonceSize]byte,
 	e.SetByteSlice(challengeBytes[:])
 
 	signingKey, err := btcec.ParsePubKey(pubKey)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 

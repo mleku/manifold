@@ -25,6 +25,8 @@ package atomic
 import (
 	"encoding/json"
 	"time"
+
+	"manifold.mleku.dev/chk"
 )
 
 // Duration is an atomic type-safe wrapper for time.Duration values.
@@ -81,7 +83,7 @@ func (x *Duration) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON decodes a time.Duration from JSON.
 func (x *Duration) UnmarshalJSON(b []byte) error {
 	var v time.Duration
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(b, &v); chk.E(err) {
 		return err
 	}
 	x.Store(v)

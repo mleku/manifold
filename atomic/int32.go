@@ -26,6 +26,8 @@ import (
 	"encoding/json"
 	"strconv"
 	"sync/atomic"
+
+	"manifold.mleku.dev/chk"
 )
 
 // Int32 is an atomic wrapper around int32.
@@ -95,7 +97,7 @@ func (i *Int32) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON decodes JSON into the wrapped int32.
 func (i *Int32) UnmarshalJSON(b []byte) error {
 	var v int32
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(b, &v); chk.E(err) {
 		return err
 	}
 	i.Store(v)

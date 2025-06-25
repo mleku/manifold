@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/ec/bech32"
-	"github.com/mleku/manifold/ec/chaincfg"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/bech32"
+	"manifold.mleku.dev/ec/chaincfg"
 )
 
 // AddressSegWit is the base address type for all SegWit addresses.

@@ -5,7 +5,7 @@
 package btcec
 
 import (
-	"github.com/mleku/manifold/ec/secp256k1"
+	"manifold.mleku.dev/ec/secp256k1"
 )
 
 // These constants define the lengths of serialized public keys.

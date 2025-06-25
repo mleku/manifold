@@ -39,12 +39,12 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/mleku/manifold/chk"
+	"manifold.mleku.dev/chk"
 )
 
 func main() {
 	log.SetFlags(0)
-	if err := run(os.Args[1:]); err != nil {
+	if err := run(os.Args[1:]); chk.E(err) {
 		log.Fatalf("%+v", err)
 	}
 }
@@ -64,7 +64,7 @@ func run(args []string) (err error) {
 	flag.StringVar(&opts.File, "file", "", "output file path (default: stdout)")
 	flag.BoolVar(&opts.Unsigned, "unsigned", false, "whether the type is unsigned")
 
-	if err = flag.Parse(args); err != nil {
+	if err = flag.Parse(args); chk.E(err) {
 		return
 	}
 
@@ -76,7 +76,7 @@ func run(args []string) (err error) {
 	if file := opts.File; len(file) > 0 {
 		var f *os.File
 		f, err = os.Create(file)
-		if err != nil {
+		if chk.E(err) {
 			return fmt.Errorf("create %q: %v", file, err)
 		}
 		defer func() { _ = f.Close() }()
@@ -97,12 +97,12 @@ func run(args []string) (err error) {
 	}
 
 	var buff bytes.Buffer
-	if err := _tmpl.ExecuteTemplate(&buff, "wrapper.tmpl", data); err != nil {
+	if err := _tmpl.ExecuteTemplate(&buff, "wrapper.tmpl", data); chk.E(err) {
 		return fmt.Errorf("render template: %v", err)
 	}
 	var bs []byte
 	bs, err = format.Source(buff.Bytes())
-	if err != nil {
+	if chk.E(err) {
 		return fmt.Errorf("reformat source: %v", err)
 	}
 

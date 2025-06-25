@@ -1,7 +1,7 @@
 package wire
 
 import (
-	"github.com/mleku/manifold/ec/chainhash"
+	"manifold.mleku.dev/ec/chainhash"
 )
 
 // OutPoint defines a bitcoin data type that is used to track previous

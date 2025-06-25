@@ -9,8 +9,8 @@ import (
 	"os/signal"
 	"runtime"
 
-	"github.com/mleku/manifold/atomic"
-	"github.com/mleku/manifold/log"
+	"manifold.mleku.dev/atomic"
+	"manifold.mleku.dev/log"
 )
 
 // HandlerWithSource is an interrupt handling closure and the source location that it was sent

@@ -3,8 +3,8 @@ package chaincfg
 import (
 	"time"
 
-	"github.com/mleku/manifold/ec/chainhash"
-	"github.com/mleku/manifold/ec/wire"
+	"manifold.mleku.dev/ec/chainhash"
+	"manifold.mleku.dev/ec/wire"
 )
 
 var (

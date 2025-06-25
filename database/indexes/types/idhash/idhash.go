@@ -4,11 +4,11 @@ import (
 	"encoding/base64"
 	"io"
 
-	"github.com/mleku/manifold/sha256"
+	"manifold.mleku.dev/sha256"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/errorf"
-	"github.com/mleku/manifold/hex"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/errorf"
+	"manifold.mleku.dev/hex"
 )
 
 const Len = 8

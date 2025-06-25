@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/database/indexes/types/number"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/database/indexes/types/number"
 )
 
 const Len = 8

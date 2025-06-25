@@ -7,16 +7,18 @@ package btcec
 import (
 	"bytes"
 	"testing"
+
+	"manifold.mleku.dev/chk"
 )
 
 func TestGenerateSharedSecret(t *testing.T) {
 	privKey1, err := NewSecretKey()
-	if err != nil {
+	if chk.E(err) {
 		t.Errorf("secret key generation error: %s", err)
 		return
 	}
 	privKey2, err := NewSecretKey()
-	if err != nil {
+	if chk.E(err) {
 		t.Errorf("secret key generation error: %s", err)
 		return
 	}

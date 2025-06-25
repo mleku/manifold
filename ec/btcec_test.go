@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"math/big"
 	"testing"
+
+	"manifold.mleku.dev/chk"
 )
 
 // isJacobianOnS256Curve returns boolean if the point (x,y,z) is on the
@@ -568,7 +570,7 @@ func TestBaseMultVerify(t *testing.T) {
 		for i := 0; i < 30; i++ {
 			data := make([]byte, bytes)
 			_, err := rand.Read(data)
-			if err != nil {
+			if chk.E(err) {
 				t.Errorf("failed to read random data for %d", i)
 				continue
 			}
@@ -638,7 +640,7 @@ func TestScalarMultRand(t *testing.T) {
 	for i := 0; i < 1024; i++ {
 		data := make([]byte, 32)
 		_, err := rand.Read(data)
-		if err != nil {
+		if chk.E(err) {
 			t.Fatalf("failed to read random data at %d", i)
 			break
 		}
@@ -799,7 +801,7 @@ func TestSplitKRand(t *testing.T) {
 	for i := 0; i < 1024; i++ {
 		bytesK := make([]byte, 32)
 		_, err := rand.Read(bytesK)
-		if err != nil {
+		if chk.E(err) {
 			t.Fatalf("failed to read random data at %d", i)
 			break
 		}
@@ -824,7 +826,7 @@ func TestSplitKRand(t *testing.T) {
 
 func testKeyGeneration(t *testing.T, c *KoblitzCurve, tag string) {
 	priv, err := NewSecretKey()
-	if err != nil {
+	if chk.E(err) {
 		t.Errorf("%s: error: %s", tag, err)
 		return
 	}

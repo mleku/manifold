@@ -26,6 +26,8 @@ import (
 	"encoding/json"
 	"strconv"
 	"sync/atomic"
+
+	"manifold.mleku.dev/chk"
 )
 
 // Uintptr is an atomic wrapper around uintptr.
@@ -95,7 +97,7 @@ func (i *Uintptr) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON decodes JSON into the wrapped uintptr.
 func (i *Uintptr) UnmarshalJSON(b []byte) error {
 	var v uintptr
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(b, &v); chk.E(err) {
 		return err
 	}
 	i.Store(v)

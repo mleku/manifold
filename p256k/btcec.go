@@ -3,8 +3,8 @@
 package p256k
 
 import (
-	"github.com/mleku/manifold/log"
-	"github.com/mleku/manifold/p256k/btcec"
+	"manifold.mleku.dev/log"
+	"manifold.mleku.dev/p256k/btcec"
 )
 
 func init() {

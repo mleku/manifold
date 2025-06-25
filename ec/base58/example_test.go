@@ -7,7 +7,8 @@ package base58_test
 import (
 	"fmt"
 
-	"github.com/mleku/manifold/ec/base58"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec/base58"
 )
 
 // This example demonstrates how to decode modified base58 encoded data.
@@ -42,7 +43,7 @@ func ExampleCheckDecode() {
 	// Decode an example Base58Check encoded data.
 	encoded := "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
 	decoded, version, err := base58.CheckDecode(encoded)
-	if err != nil {
+	if chk.E(err) {
 		fmt.Println(err)
 		return
 	}

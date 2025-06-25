@@ -10,8 +10,9 @@ import (
 	"fmt"
 
 	"github.com/minio/sha256-simd"
+	"manifold.mleku.dev/chk"
 
-	"github.com/mleku/manifold/hex"
+	"manifold.mleku.dev/hex"
 )
 
 const (
@@ -120,11 +121,11 @@ func (hash *Hash) UnmarshalJSON(input []byte) error {
 	}
 	var sh string
 	err := json.Unmarshal(input, &sh)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 	newHash, err := NewHashFromStr(sh)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 	return hash.SetBytes(newHash[:])
@@ -135,7 +136,7 @@ func (hash *Hash) UnmarshalJSON(input []byte) error {
 func NewHash(newHash []byte) (*Hash, error) {
 	var sh Hash
 	err := sh.SetBytes(newHash)
-	if err != nil {
+	if chk.E(err) {
 		return nil, err
 	}
 	return &sh, err
@@ -171,7 +172,7 @@ func TaggedHash(tag []byte, msgs ...[]byte) *Hash {
 func NewHashFromStr(hash string) (*Hash, error) {
 	ret := new(Hash)
 	err := Decode(ret, hash)
-	if err != nil {
+	if chk.E(err) {
 		return nil, err
 	}
 	return ret, nil
@@ -198,7 +199,7 @@ func Decode(dst *Hash, src string) error {
 	var reversedHash Hash
 	_, err := hex.DecAppend(reversedHash[HashSize-hex.DecLen(len(srcBytes)):],
 		srcBytes)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 	// Reverse copy from the temporary hash to destination.  Because the
@@ -214,7 +215,7 @@ func Decode(dst *Hash, src string) error {
 func decodeLegacy(dst *Hash, src []byte) error {
 	var hashBytes []byte
 	err := json.Unmarshal(src, &hashBytes)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 	if len(hashBytes) != HashSize {

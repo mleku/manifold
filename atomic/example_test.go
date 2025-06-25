@@ -23,7 +23,7 @@ package atomic_test
 import (
 	"fmt"
 
-	"github.com/mleku/manifold/atomic"
+	"manifold.mleku.dev/atomic"
 )
 
 func Example() {

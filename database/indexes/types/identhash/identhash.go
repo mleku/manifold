@@ -3,7 +3,7 @@ package identhash
 import (
 	"io"
 
-	"github.com/mleku/manifold/sha256"
+	"manifold.mleku.dev/sha256"
 )
 
 const Len = 8

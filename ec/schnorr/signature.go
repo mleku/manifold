@@ -5,10 +5,10 @@ package schnorr
 import (
 	"fmt"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/ec"
-	"github.com/mleku/manifold/ec/chainhash"
-	"github.com/mleku/manifold/ec/secp256k1"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec"
+	"manifold.mleku.dev/ec/chainhash"
+	"manifold.mleku.dev/ec/secp256k1"
 )
 
 const (
@@ -139,7 +139,7 @@ func schnorrVerify(sig *Signature, hash []byte, pubKeyBytes []byte) error {
 	//
 	// Fail if P is not a point on the curve
 	pubKey, err := ParsePubKey(pubKeyBytes)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 	if !pubKey.IsOnCurve() {
@@ -474,7 +474,7 @@ func Sign(privKey *btcec.SecretKey, hash []byte,
 		}
 		sig, err := schnorrSign(&privKeyScalar, &kPrime, pub, hash, opts)
 		kPrime.Zero()
-		if err != nil {
+		if chk.E(err) {
 			return nil, err
 		}
 		return sig, nil
@@ -495,7 +495,7 @@ func Sign(privKey *btcec.SecretKey, hash []byte,
 		// Steps 10-15.
 		sig, err := schnorrSign(&privKeyScalar, k, pub, hash, opts)
 		k.Zero()
-		if err != nil {
+		if chk.E(err) {
 			// Try again with a new nonce.
 			continue
 		}

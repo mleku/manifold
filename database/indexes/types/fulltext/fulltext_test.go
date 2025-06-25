@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/mleku/manifold/database/indexes/types/fulltext"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/database/indexes/types/fulltext"
 )
 
 func TestT(t *testing.T) {
@@ -32,7 +33,7 @@ func TestT(t *testing.T) {
 
 		// Test MarshalWrite
 		var buf bytes.Buffer
-		if err := ft.MarshalWrite(&buf); err != nil {
+		if err := ft.MarshalWrite(&buf); chk.E(err) {
 			t.Fatalf("MarshalWrite failed: %v", err)
 		}
 
@@ -43,7 +44,7 @@ func TestT(t *testing.T) {
 
 		// Test UnmarshalRead
 		newFt := fulltext.New()
-		if err := newFt.UnmarshalRead(&buf); err != nil {
+		if err := newFt.UnmarshalRead(&buf); chk.E(err) {
 			t.Fatalf("UnmarshalRead failed: %v", err)
 		}
 
@@ -63,7 +64,7 @@ func TestUnmarshalReadHandlesMissingZeroByte(t *testing.T) {
 	err := ft.UnmarshalRead(reader)
 
 	// Expect an EOF or similar handling
-	if err == nil {
+	if !chk.E(err) {
 		t.Errorf("UnmarshalRead should fail gracefully on missing zero-byte, but it didn't")
 	}
 

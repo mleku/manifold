@@ -7,10 +7,11 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/mleku/manifold/ec"
-	"github.com/mleku/manifold/ec/chainhash"
-	"github.com/mleku/manifold/ec/schnorr"
-	"github.com/mleku/manifold/ec/secp256k1"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/ec"
+	"manifold.mleku.dev/ec/chainhash"
+	"manifold.mleku.dev/ec/schnorr"
+	"manifold.mleku.dev/ec/secp256k1"
 )
 
 var (
@@ -390,7 +391,7 @@ func AggregateKeys(keys []*btcec.PublicKey, sort bool,
 			finalKeyJ, parityAcc, opts.tweaks[i-1].Tweak, tweakAcc,
 			opts.tweaks[i-1].IsXOnly,
 		)
-		if err != nil {
+		if chk.E(err) {
 			return nil, nil, nil, err
 		}
 	}

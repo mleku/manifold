@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/log"
-	"github.com/mleku/manifold/p256k"
-	"github.com/mleku/manifold/sha256"
-	realy "github.com/mleku/manifold/signer"
+	"manifold.mleku.dev/chk"
+	"manifold.mleku.dev/log"
+	"manifold.mleku.dev/p256k"
+	"manifold.mleku.dev/sha256"
+	realy "manifold.mleku.dev/signer"
 )
 
 func TestSigner_Generate(t *testing.T) {
@@ -59,7 +59,7 @@ func TestSignerVerify(t *testing.T) {
 	// Modify the message and verify again
 	tamperedMessage := sha256.Sum256Bytes([]byte("Hello, tampered world!"))
 	valid, err = signer.Verify(tamperedMessage, signature)
-	if err == nil {
+	if !chk.E(err) {
 		t.Fatalf("Error verifying tampered message: %v", err)
 	}
 
