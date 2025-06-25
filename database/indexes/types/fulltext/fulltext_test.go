@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/mleku/manifold/database/keys/types/fulltext"
+	"github.com/mleku/manifold/database/indexes/types/fulltext"
 )
 
 func TestT(t *testing.T) {

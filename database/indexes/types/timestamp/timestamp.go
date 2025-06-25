@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/mleku/manifold/chk"
-	"github.com/mleku/manifold/database/keys/types/number"
+	"github.com/mleku/manifold/database/indexes/types/number"
 )
 
 const Len = 8
