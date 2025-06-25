@@ -74,17 +74,21 @@ func (e *E) ReadBinary(r io.Reader) (err error) {
 		return
 	}
 	for range vi {
+		// read key length
 		if vi, err = Decode(r); ck(err) {
 			return
 		}
 		key := make([]byte, vi)
+		// read key
 		if _, err = r.Read(key); ck(err) {
 			return
 		}
+		// read value length
 		if vi, err = Decode(r); ck(err) {
 			return
 		}
 		val := make([]byte, vi)
+		// read value
 		if _, err = r.Read(val); ck(err) {
 			return
 		}
