@@ -63,6 +63,18 @@ func TestQueryEvents(t *testing.T) {
 		testFilterByTimestamp(t, db, events)
 	})
 
+	t.Run("FilterByAuthorAndTimestamp", func(t *testing.T) {
+		testFilterByAuthorAndTimestamp(t, db, events)
+	})
+
+	t.Run("FilterByTagsAndTimestamp", func(t *testing.T) {
+		testFilterByTagsAndTimestamp(t, db, events)
+	})
+
+	t.Run("FilterByAuthorTagsAndTimestamp", func(t *testing.T) {
+		testFilterByAuthorTagsAndTimestamp(t, db, events)
+	})
+
 	t.Run("FilterWithNoSpecificCriteria", func(t *testing.T) {
 		testFilterWithNoSpecificCriteria(t, db, events)
 	})
@@ -386,6 +398,246 @@ func testFilterByTimestamp(t *testing.T, db *D, events []*event.E) {
 
 		if ev.Timestamp < since {
 			t.Fatalf("Event has timestamp %d, which is less than since %d", ev.Timestamp, since)
+		}
+	}
+}
+
+// testFilterByAuthorAndTimestamp tests filtering events by both author and timestamp.
+func testFilterByAuthorAndTimestamp(t *testing.T, db *D, events []*event.E) {
+	// Get the pubkey of the first author
+	pubkey := events[0].Pubkey
+
+	// Find the middle timestamp
+	timestamps := make([]int64, len(events))
+	for i, ev := range events {
+		timestamps[i] = ev.Timestamp
+	}
+
+	// Sort timestamps
+	for i := 0; i < len(timestamps); i++ {
+		for j := i + 1; j < len(timestamps); j++ {
+			if timestamps[i] > timestamps[j] {
+				timestamps[i], timestamps[j] = timestamps[j], timestamps[i]
+			}
+		}
+	}
+
+	// Use the middle timestamp as the since value
+	middleIndex := len(timestamps) / 2
+	since := timestamps[middleIndex]
+
+	// Create filter with author and since timestamp
+	f := filter.F{
+		Authors: [][]byte{pubkey},
+		Since:   since,
+	}
+
+	// Count events with this author and timestamp >= since
+	expectedCount := 0
+	for _, ev := range events {
+		if bytes.Equal(ev.Pubkey, pubkey) && ev.Timestamp >= since {
+			expectedCount++
+		}
+	}
+
+	// Query events
+	result, err := db.QueryEvents(f)
+	if err != nil {
+		t.Fatalf("QueryEvents failed: %v", err)
+	}
+
+	// Verify results
+	if len(result) != expectedCount {
+		t.Fatalf("Expected %d events, got %d", expectedCount, len(result))
+	}
+
+	// Verify each result has the correct author and timestamp
+	for _, id := range result {
+		ev, err := db.GetEventById(id)
+		if err != nil {
+			t.Fatalf("Failed to get event: %v", err)
+		}
+
+		if !bytes.Equal(ev.Pubkey, pubkey) {
+			t.Fatalf("Event has incorrect author")
+		}
+
+		if ev.Timestamp < since {
+			t.Fatalf("Event has timestamp %d, which is less than since %d", ev.Timestamp, since)
+		}
+	}
+}
+
+// testFilterByTagsAndTimestamp tests filtering events by both tags and timestamp.
+func testFilterByTagsAndTimestamp(t *testing.T, db *D, events []*event.E) {
+	// Create filter with tag
+	tagKey := "type"
+	tagValue := "text"
+
+	// Find the middle timestamp
+	timestamps := make([]int64, len(events))
+	for i, ev := range events {
+		timestamps[i] = ev.Timestamp
+	}
+
+	// Sort timestamps
+	for i := 0; i < len(timestamps); i++ {
+		for j := i + 1; j < len(timestamps); j++ {
+			if timestamps[i] > timestamps[j] {
+				timestamps[i], timestamps[j] = timestamps[j], timestamps[i]
+			}
+		}
+	}
+
+	// Use the middle timestamp as the since value
+	middleIndex := len(timestamps) / 2
+	since := timestamps[middleIndex]
+
+	// Create filter with tag and since timestamp
+	f := filter.F{
+		Tags: filter.TagMap{
+			tagKey: {[]byte(tagValue)},
+		},
+		Since: since,
+	}
+
+	// Count events with this tag and timestamp >= since
+	expectedCount := 0
+	for _, ev := range events {
+		if ev.Timestamp < since {
+			continue
+		}
+
+		for _, tag := range *ev.Tags {
+			if bytes.Equal(tag.Key, []byte(tagKey)) && bytes.Equal(tag.Value, []byte(tagValue)) {
+				expectedCount++
+				break
+			}
+		}
+	}
+
+	// Query events
+	result, err := db.QueryEvents(f)
+	if err != nil {
+		t.Fatalf("QueryEvents failed: %v", err)
+	}
+
+	// Verify results
+	if len(result) != expectedCount {
+		t.Fatalf("Expected %d events, got %d", expectedCount, len(result))
+	}
+
+	// Verify each result has the correct tag and timestamp
+	for _, id := range result {
+		ev, err := db.GetEventById(id)
+		if err != nil {
+			t.Fatalf("Failed to get event: %v", err)
+		}
+
+		if ev.Timestamp < since {
+			t.Fatalf("Event has timestamp %d, which is less than since %d", ev.Timestamp, since)
+		}
+
+		found := false
+		for _, tag := range *ev.Tags {
+			if bytes.Equal(tag.Key, []byte(tagKey)) && bytes.Equal(tag.Value, []byte(tagValue)) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("Event does not have the expected tag")
+		}
+	}
+}
+
+// testFilterByAuthorTagsAndTimestamp tests filtering events by author, tags, and timestamp.
+func testFilterByAuthorTagsAndTimestamp(t *testing.T, db *D, events []*event.E) {
+	// Get the pubkey of the first author
+	pubkey := events[0].Pubkey
+
+	// Create filter with tag
+	tagKey := "type"
+	tagValue := "text"
+
+	// Find the middle timestamp
+	timestamps := make([]int64, len(events))
+	for i, ev := range events {
+		timestamps[i] = ev.Timestamp
+	}
+
+	// Sort timestamps
+	for i := 0; i < len(timestamps); i++ {
+		for j := i + 1; j < len(timestamps); j++ {
+			if timestamps[i] > timestamps[j] {
+				timestamps[i], timestamps[j] = timestamps[j], timestamps[i]
+			}
+		}
+	}
+
+	// Use the middle timestamp as the since value
+	middleIndex := len(timestamps) / 2
+	since := timestamps[middleIndex]
+
+	// Create filter with author, tag, and since timestamp
+	f := filter.F{
+		Authors: [][]byte{pubkey},
+		Tags: filter.TagMap{
+			tagKey: {[]byte(tagValue)},
+		},
+		Since: since,
+	}
+
+	// Count events with this author, tag, and timestamp >= since
+	expectedCount := 0
+	for _, ev := range events {
+		if !bytes.Equal(ev.Pubkey, pubkey) || ev.Timestamp < since {
+			continue
+		}
+
+		for _, tag := range *ev.Tags {
+			if bytes.Equal(tag.Key, []byte(tagKey)) && bytes.Equal(tag.Value, []byte(tagValue)) {
+				expectedCount++
+				break
+			}
+		}
+	}
+
+	// Query events
+	result, err := db.QueryEvents(f)
+	if err != nil {
+		t.Fatalf("QueryEvents failed: %v", err)
+	}
+
+	// Verify results
+	if len(result) != expectedCount {
+		t.Fatalf("Expected %d events, got %d", expectedCount, len(result))
+	}
+
+	// Verify each result has the correct author, tag, and timestamp
+	for _, id := range result {
+		ev, err := db.GetEventById(id)
+		if err != nil {
+			t.Fatalf("Failed to get event: %v", err)
+		}
+
+		if !bytes.Equal(ev.Pubkey, pubkey) {
+			t.Fatalf("Event has incorrect author")
+		}
+
+		if ev.Timestamp < since {
+			t.Fatalf("Event has timestamp %d, which is less than since %d", ev.Timestamp, since)
+		}
+
+		found := false
+		for _, tag := range *ev.Tags {
+			if bytes.Equal(tag.Key, []byte(tagKey)) && bytes.Equal(tag.Value, []byte(tagValue)) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("Event does not have the expected tag")
 		}
 	}
 }
