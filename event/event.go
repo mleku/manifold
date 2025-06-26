@@ -73,7 +73,7 @@ type E struct {
 	Pubkey    []byte
 	Timestamp int64
 	Content   []byte
-	Tags      Tags
+	Tags      *Tags
 	Signature []byte
 }
 
@@ -225,7 +225,10 @@ func (e *E) Unmarshal(data []byte) (err error) {
 					return
 				}
 			}
-			e.Tags = append(e.Tags, Tag{key, value})
+			if e.Tags == nil {
+				e.Tags = &Tags{}
+			}
+			*e.Tags = append(*e.Tags, Tag{key, value})
 		case bytes.HasPrefix(line, Sentinels[SIGNATURE]):
 			switch {
 			case !founds[PUBKEY]:
@@ -268,7 +271,7 @@ func (e *E) Marshal() (data []byte, err error) {
 	buf := new(bytes.Buffer)
 out:
 	for i := range Sentinels {
-		if i == SIGNATURE && e.Signature == nil {
+		if (i == SIGNATURE && e.Signature == nil) || (i == TAG && e.Tags == nil || len(*e.Tags) == 0) {
 			// if no signature is present, this means it should be marshaled in
 			// the canonical format to be hashed to generate the message hash to
 			// sign.
@@ -303,7 +306,10 @@ out:
 				}
 			}
 		case TAG:
-			for t, v := range e.Tags {
+			if e.Tags == nil || len(*e.Tags) == 0 {
+				continue
+			}
+			for t, v := range *e.Tags {
 				if err = text.Write(buf, v.Key); chk.E(err) {
 					return
 				}
@@ -323,7 +329,7 @@ out:
 						return
 					}
 				}
-				if t < len(e.Tags)-1 {
+				if t < len(*e.Tags)-1 {
 					buf.WriteByte('\n')
 					buf.Write(Sentinels[i])
 				}

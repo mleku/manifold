@@ -27,15 +27,19 @@ func (e *E) WriteBinary(w io.Writer) (err error) {
 	if _, err = w.Write(e.Content); ck(err) {
 		return
 	}
-	Encode(w, len(e.Tags))
-	for _, v := range e.Tags {
-		Encode(w, len(v.Key))
-		if _, err = w.Write(v.Key); ck(err) {
-			return
-		}
-		Encode(w, len(v.Value))
-		if _, err = w.Write(v.Value); ck(err) {
-			return
+	if e.Tags == nil || len(*e.Tags) == 0 {
+		Encode(w, 0)
+	} else {
+		Encode(w, len(*e.Tags))
+		for _, v := range *e.Tags {
+			Encode(w, len(v.Key))
+			if _, err = w.Write(v.Key); ck(err) {
+				return
+			}
+			Encode(w, len(v.Value))
+			if _, err = w.Write(v.Value); ck(err) {
+				return
+			}
 		}
 	}
 	if _, err = w.Write(e.Signature); ck(err) {
@@ -92,7 +96,10 @@ func (e *E) ReadBinary(r io.Reader) (err error) {
 		if _, err = r.Read(val); ck(err) {
 			return
 		}
-		e.Tags = append(e.Tags, Tag{key, val})
+		if e.Tags == nil {
+			e.Tags = &Tags{}
+		}
+		*e.Tags = append(*e.Tags, Tag{key, val})
 	}
 	e.Signature = make([]byte, schnorr.SignatureSize)
 	if _, err = r.Read(e.Signature); ck(err) {

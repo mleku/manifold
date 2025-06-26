@@ -12,24 +12,18 @@ import (
 )
 
 func (d *D) StoreEvent(ev *event.E) (err error) {
-	var ev2 *event.E
+	var ev2 *number.Uint40
 	var eid []byte
 	if eid, err = ev.Id(); chk.E(err) {
 		return
 	}
-	if ev2, err = d.GetEventById(eid); chk.E(err) {
+	if ev2, err = d.FindEventSerialById(eid); err != nil {
+		err = nil
 		// so we didn't find it?
 	}
 	if ev2 != nil {
 		// we did found it
-		var e2id []byte
-		if e2id, err = ev2.Id(); chk.E(err) {
-			return
-		}
-		if bytes.Equal(eid, e2id) {
-			err = errorf.E("duplicate event")
-			return
-		}
+		err = errorf.E("duplicate event")
 	}
 	var ser *number.Uint40
 	var idxs [][]byte
@@ -61,5 +55,8 @@ func (d *D) StoreEvent(ev *event.E) (err error) {
 	if err = d.Set(evk.Bytes(), evV.Bytes()); chk.E(err) {
 		return
 	}
+	//var evb []byte
+	//evb, _ = ev.Marshal()
+	//log.I.F("\n%s\n", evb)
 	return
 }

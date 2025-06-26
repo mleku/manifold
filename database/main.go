@@ -47,7 +47,7 @@ func (d *D) Init(path string) (err error) {
 		return err
 	}
 	log.I.Ln("getting event store sequence index", d.dataDir)
-	if d.seq, err = d.DB.GetSequence([]byte("events"), 1000); chk.E(err) {
+	if d.seq, err = d.DB.GetSequence([]byte("EVENTS"), 1000); chk.E(err) {
 		return err
 	}
 	return nil
@@ -80,6 +80,21 @@ func (d *D) Update(fn func(txn *badger.Txn) (err error)) (err error) {
 func (d *D) Set(k, v []byte) (err error) {
 	if err = d.Update(func(txn *badger.Txn) (err error) {
 		if err = txn.Set(k, v); chk.E(err) {
+			return
+		}
+		return
+	}); chk.E(err) {
+		return
+	}
+	return
+}
+func (d *D) Get(k []byte) (v []byte, err error) {
+	if err = d.Update(func(txn *badger.Txn) (err error) {
+		var it *badger.Item
+		if it, err = txn.Get(k); chk.E(err) {
+			return
+		}
+		if v, err = it.ValueCopy(nil); chk.E(err) {
 			return
 		}
 		return

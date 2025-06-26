@@ -60,12 +60,11 @@ func (d *D) GetEventFromSerial(ser *number.Uint40) (ev *event.E, err error) {
 		if val, err = item.ValueCopy(nil); chk.E(err) {
 			return
 		}
-		var e event.E
+		ev = &event.E{}
 		vr := bytes.NewBuffer(val)
 		if err = ev.ReadBinary(vr); chk.E(err) {
 			return
 		}
-		ev = &e
 		return
 	}); err != nil {
 		return

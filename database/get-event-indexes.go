@@ -67,26 +67,27 @@ func (d *D) GetEventIndexes(ev *event.E) (indices [][]byte, ser *number.Uint40, 
 		return
 	}
 	indices = append(indices, evICaB.Bytes())
+	if ev.Tags != nil {
+		for _, t := range *ev.Tags {
+			k, v := identhash.New(), identhash.New()
+			if err = k.FromIdent(t.Key); chk.E(err) {
+				return
+			}
+			if err = v.FromIdent(t.Value); chk.E(err) {
+				return
+			}
+			tb := new(bytes.Buffer)
+			if err = indexes.TagTimestampEnc(k, v, ts, ser).MarshalWrite(tb); chk.E(err) {
+				return
+			}
+			indices = append(indices, tb.Bytes())
 
-	for _, t := range ev.Tags {
-		k, v := identhash.New(), identhash.New()
-		if err = k.FromIdent(t.Key); chk.E(err) {
-			return
+			ptb := new(bytes.Buffer)
+			if err = indexes.PubkeyTagTimestampEnc(p, k, v, ts, ser).MarshalWrite(ptb); chk.E(err) {
+				return
+			}
+			indices = append(indices, ptb.Bytes())
 		}
-		if err = v.FromIdent(t.Value); chk.E(err) {
-			return
-		}
-		tb := new(bytes.Buffer)
-		if err = indexes.TagTimestampEnc(k, v, ts, ser).MarshalWrite(tb); chk.E(err) {
-			return
-		}
-		indices = append(indices, tb.Bytes())
-
-		ptb := new(bytes.Buffer)
-		if err = indexes.PubkeyTagTimestampEnc(p, k, v, ts, ser).MarshalWrite(ptb); chk.E(err) {
-			return
-		}
-		indices = append(indices, ptb.Bytes())
 	}
 
 	return

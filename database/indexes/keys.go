@@ -209,8 +209,11 @@ func PubkeyTimestampDec(p *pubhash.T, ts *Uint64, ser *Uint40) (enc *T) {
 // [ prefix ][ 8 bytes truncated hash of pubkey ][ 8 bytes truncated hash of key ][ 8 bytes truncated hash of value ][ 8 bytes timestamp ][ 8 serial ]
 const PubkeyTagTimestamp = 5
 
-func PubkeyTagTimestampVars() (p *pubhash.T, k, v *identhash.T, ser *Uint40) {
+func PubkeyTagTimestampVars() (p *pubhash.T, k, v *identhash.T, ts *Uint64, ser *Uint40) {
+	p = pubhash.New()
 	k = identhash.New()
+	v = identhash.New()
+	ts = new(Uint64)
 	ser = new(Uint40)
 	return
 }

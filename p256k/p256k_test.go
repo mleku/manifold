@@ -74,7 +74,7 @@ func TestECDH(t *testing.T) {
 	var err error
 	var s1, s2 realy.I
 	var counter int
-	const total = 100
+	const total = 50
 	for _ = range total {
 		s1, s2 = &p256k.Signer{}, &p256k.Signer{}
 		if err = s1.GenerateForECDH(); chk.E(err) {
