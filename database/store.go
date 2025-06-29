@@ -55,8 +55,5 @@ func (d *D) StoreEvent(ev *event.E) (err error) {
 	if err = d.Set(evk.Bytes(), evV.Bytes()); chk.E(err) {
 		return
 	}
-	//var evb []byte
-	//evb, _ = ev.Marshal()
-	//log.I.F("\n%s\n", evb)
 	return
 }

@@ -23,7 +23,7 @@ var DecLen = hex.DecodedLen
 
 type InvalidByteError = hex.InvalidByteError
 
-// EncAppend uses xhex to encode a sice of bytes and appends it to a provided destination slice.
+// EncAppend uses xhex to encode a slice of bytes and appends it to a provided destination slice.
 func EncAppend(dst, src []byte) (b []byte) {
 	l := len(dst)
 	dst = append(dst, make([]byte, len(src)*2)...)
