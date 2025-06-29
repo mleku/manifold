@@ -50,7 +50,7 @@ func (e *E) WriteBinary(w io.Writer) (err error) {
 
 func (e *E) ReadBinary(r io.Reader) (err error) {
 	if e == nil {
-		err = ef("cannot unmarshal nil event")
+		err = ef("cannot unmarshal to nil event")
 		return
 	}
 	// read in pubkey

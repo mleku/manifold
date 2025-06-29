@@ -24,20 +24,21 @@ func TestQueryEvents(t *testing.T) {
 
 	// Create a new database
 	db := New()
-	if err := db.Init(tempDir); err != nil {
+	if err = db.Init(tempDir); err != nil {
 		t.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
 
 	// Generate test events
-	events, err := generateTestEvents(10)
+	var events []*event.E
+	events, err = generateTestEvents(10)
 	if err != nil {
 		t.Fatalf("Failed to generate test events: %v", err)
 	}
 
 	// Store events in the database
 	for _, ev := range events {
-		if err := db.StoreEvent(ev); err != nil {
+		if err = db.StoreEvent(ev); err != nil {
 			t.Fatalf("Failed to store event: %v", err)
 		}
 	}
@@ -85,6 +86,23 @@ func TestQueryEvents(t *testing.T) {
 
 	t.Run("SortingDescending", func(t *testing.T) {
 		testSortingDescending(t, db, events)
+	})
+
+	// Tests for negation features
+	t.Run("FilterByNotIds", func(t *testing.T) {
+		testFilterByNotIds(t, db, events)
+	})
+
+	t.Run("FilterByNotAuthors", func(t *testing.T) {
+		testFilterByNotAuthors(t, db, events)
+	})
+
+	t.Run("FilterByNotTags", func(t *testing.T) {
+		testFilterByNotTags(t, db, events)
+	})
+
+	t.Run("FilterByCombinedNegations", func(t *testing.T) {
+		testFilterByCombinedNegations(t, db, events)
 	})
 }
 
@@ -688,7 +706,6 @@ func testSortingAscending(t *testing.T, db *D, events []*event.E) {
 		if err != nil {
 			t.Fatalf("Failed to get event: %v", err)
 		}
-
 		if ev1.Timestamp > ev2.Timestamp {
 			t.Fatalf("Events not sorted in ascending order")
 		}
@@ -727,6 +744,221 @@ func testSortingDescending(t *testing.T, db *D, events []*event.E) {
 
 		if ev1.Timestamp < ev2.Timestamp {
 			t.Fatalf("Events not sorted in descending order")
+		}
+	}
+}
+
+// testFilterByNotIds tests filtering events by excluding specific IDs.
+func testFilterByNotIds(t *testing.T, db *D, events []*event.E) {
+	// Get all event IDs
+	allIds := make([][]byte, len(events))
+	for i, ev := range events {
+		var err error
+		allIds[i], err = ev.Id()
+		if err != nil {
+			t.Fatalf("Failed to get event ID: %v", err)
+		}
+	}
+
+	// Exclude the first 2 events
+	notIds := allIds[:2]
+
+	// Create filter with all IDs and NotIds
+	f := filter.F{
+		Ids:    allIds,
+		NotIds: notIds,
+	}
+
+	// Query events
+	result, err := db.QueryEvents(f)
+	if err != nil {
+		t.Fatalf("QueryEvents failed: %v", err)
+	}
+
+	// Verify results
+	expectedCount := len(allIds) - len(notIds)
+	if len(result) != expectedCount {
+		t.Fatalf("Expected %d events, got %d", expectedCount, len(result))
+	}
+
+	// Verify that excluded IDs are not in the result
+	for _, notId := range notIds {
+		for _, resultId := range result {
+			if bytes.Equal(notId, resultId) {
+				t.Fatalf("Excluded ID %x found in result", notId)
+			}
+		}
+	}
+}
+
+// testFilterByNotAuthors tests filtering events by excluding specific authors.
+func testFilterByNotAuthors(t *testing.T, db *D, events []*event.E) {
+	// Get the pubkey of the first author
+	notAuthor := events[0].Pubkey
+
+	// Count events with this pubkey
+	excludedCount := 0
+	for _, ev := range events {
+		if bytes.Equal(ev.Pubkey, notAuthor) {
+			excludedCount++
+		}
+	}
+
+	// Create filter with NotAuthors
+	f := filter.F{
+		NotAuthors: [][]byte{notAuthor},
+	}
+
+	// Query events
+	result, err := db.QueryEvents(f)
+	if err != nil {
+		t.Fatalf("QueryEvents failed: %v", err)
+	}
+
+	// Verify results
+	expectedCount := len(events) - excludedCount
+	if len(result) != expectedCount {
+		t.Fatalf("Expected %d events, got %d", expectedCount, len(result))
+	}
+
+	// Verify that no events from the excluded author are in the result
+	for _, id := range result {
+		ev, err := db.GetEventById(id)
+		if err != nil {
+			t.Fatalf("Failed to get event: %v", err)
+		}
+		if bytes.Equal(ev.Pubkey, notAuthor) {
+			t.Fatalf("Event from excluded author found in result")
+		}
+	}
+}
+
+// testFilterByNotTags tests filtering events by excluding specific tags.
+func testFilterByNotTags(t *testing.T, db *D, events []*event.E) {
+	// Create filter with NotTags
+	notTagKey := "type"
+	notTagValue := "text"
+
+	f := filter.F{
+		NotTags: filter.TagMap{
+			notTagKey: {[]byte(notTagValue)},
+		},
+	}
+
+	// Count events with this tag
+	excludedCount := 0
+	for _, ev := range events {
+		if ev.Tags != nil {
+			for _, tag := range *ev.Tags {
+				if bytes.Equal(tag.Key, []byte(notTagKey)) && bytes.Equal(tag.Value, []byte(notTagValue)) {
+					excludedCount++
+					break
+				}
+			}
+		}
+	}
+
+	// Query events
+	result, err := db.QueryEvents(f)
+	if err != nil {
+		t.Fatalf("QueryEvents failed: %v", err)
+	}
+
+	// Verify results
+	expectedCount := len(events) - excludedCount
+	if len(result) != expectedCount {
+		t.Fatalf("Expected %d events, got %d", expectedCount, len(result))
+	}
+
+	// Verify that no events with the excluded tag are in the result
+	for _, id := range result {
+		ev, err := db.GetEventById(id)
+		if err != nil {
+			t.Fatalf("Failed to get event: %v", err)
+		}
+
+		if ev.Tags != nil {
+			for _, tag := range *ev.Tags {
+				if bytes.Equal(tag.Key, []byte(notTagKey)) && bytes.Equal(tag.Value, []byte(notTagValue)) {
+					t.Fatalf("Event with excluded tag found in result")
+				}
+			}
+		}
+	}
+}
+
+// testFilterByCombinedNegations tests filtering events by combining multiple negation criteria.
+func testFilterByCombinedNegations(t *testing.T, db *D, events []*event.E) {
+	// Get the pubkey of the first author
+	notAuthor := events[0].Pubkey
+
+	// Create filter with NotAuthors and NotTags
+	notTagKey := "type"
+	notTagValue := "text"
+
+	f := filter.F{
+		NotAuthors: [][]byte{notAuthor},
+		NotTags: filter.TagMap{
+			notTagKey: {[]byte(notTagValue)},
+		},
+	}
+
+	// Count events that should be excluded
+	excludedCount := 0
+	for _, ev := range events {
+		excluded := false
+
+		// Check if author is excluded
+		if bytes.Equal(ev.Pubkey, notAuthor) {
+			excluded = true
+		}
+
+		// Check if tag is excluded
+		if !excluded && ev.Tags != nil {
+			for _, tag := range *ev.Tags {
+				if bytes.Equal(tag.Key, []byte(notTagKey)) && bytes.Equal(tag.Value, []byte(notTagValue)) {
+					excluded = true
+					break
+				}
+			}
+		}
+
+		if excluded {
+			excludedCount++
+		}
+	}
+
+	// Query events
+	result, err := db.QueryEvents(f)
+	if err != nil {
+		t.Fatalf("QueryEvents failed: %v", err)
+	}
+
+	// Verify results
+	expectedCount := len(events) - excludedCount
+	if len(result) != expectedCount {
+		t.Fatalf("Expected %d events, got %d", expectedCount, len(result))
+	}
+
+	// Verify that no events with the excluded criteria are in the result
+	for _, id := range result {
+		ev, err := db.GetEventById(id)
+		if err != nil {
+			t.Fatalf("Failed to get event: %v", err)
+		}
+
+		// Check author
+		if bytes.Equal(ev.Pubkey, notAuthor) {
+			t.Fatalf("Event from excluded author found in result")
+		}
+
+		// Check tags
+		if ev.Tags != nil {
+			for _, tag := range *ev.Tags {
+				if bytes.Equal(tag.Key, []byte(notTagKey)) && bytes.Equal(tag.Value, []byte(notTagValue)) {
+					t.Fatalf("Event with excluded tag found in result")
+				}
+			}
 		}
 	}
 }

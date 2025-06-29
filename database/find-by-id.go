@@ -72,7 +72,12 @@ func (d *D) GetEventFromSerial(ser *number.Uint40) (ev *event.E, err error) {
 	return
 }
 
-func (d *D) GetEventIdFromSerial(ser *number.Uint40) (id []byte, err error) {
+type IdPubkeyTimestamp struct {
+	Id, Pubkey []byte
+	Timestamp  int64
+}
+
+func (d *D) GetIdPubkeyTimestampFromSerial(ser *number.Uint40) (id, pk []byte, ts int64, err error) {
 	if err = d.View(func(txn *badger.Txn) (err error) {
 		enc := indexes.IdPubkeyTimestampSearch(ser)
 		prf := new(bytes.Buffer)
@@ -91,6 +96,8 @@ func (d *D) GetEventIdFromSerial(ser *number.Uint40) (id []byte, err error) {
 				return
 			}
 			id = t.Bytes()
+			pk = p.Bytes()
+			ts = int64(ca.Get())
 		}
 		return
 	}); chk.E(err) {

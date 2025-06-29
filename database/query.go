@@ -16,9 +16,178 @@ import (
 // QueryEvents finds events that match the given filter and returns their IDs.
 // The results are sorted according to the Sort field in the filter.
 func (d *D) QueryEvents(f filter.F) (eventIds [][]byte, err error) {
-	// If specific IDs are provided, just return those
+	// If specific IDs are provided, just return those (considering NotIds)
 	if len(f.Ids) > 0 {
+		// If NotIds is also specified, filter out those IDs
+		if len(f.NotIds) > 0 {
+			filteredIds := make([][]byte, 0, len(f.Ids))
+			for _, id := range f.Ids {
+				excluded := false
+				for _, notId := range f.NotIds {
+					if bytes.Equal(id, notId) {
+						excluded = true
+						break
+					}
+				}
+				if !excluded {
+					filteredIds = append(filteredIds, id)
+				}
+			}
+			return filteredIds, nil
+		}
 		return f.Ids, nil
+	}
+
+	// If only NotIds is specified, we need to get all events and filter out those IDs
+	if len(f.NotIds) > 0 && len(f.Authors) == 0 && len(f.Tags) == 0 && len(f.NotAuthors) == 0 && len(f.NotTags) == 0 && f.Since <= 0 && f.Until <= 0 {
+		// Get all event IDs
+		allEvents, err := d.QueryEvents(filter.F{})
+		if err != nil {
+			return nil, err
+		}
+
+		// Filter out the NotIds
+		filteredIds := make([][]byte, 0, len(allEvents))
+		for _, id := range allEvents {
+			excluded := false
+			for _, notId := range f.NotIds {
+				if bytes.Equal(id, notId) {
+					excluded = true
+					break
+				}
+			}
+			if !excluded {
+				filteredIds = append(filteredIds, id)
+			}
+		}
+		return filteredIds, nil
+	}
+
+	// If only NotAuthors is specified, we need to get all events and filter out those from the specified authors
+	if len(f.NotAuthors) > 0 && len(f.Ids) == 0 && len(f.Authors) == 0 && len(f.Tags) == 0 && len(f.NotIds) == 0 && len(f.NotTags) == 0 && f.Since <= 0 && f.Until <= 0 {
+		// Get all events
+		allEvents, err := d.QueryEvents(filter.F{})
+		if err != nil {
+			return nil, err
+		}
+
+		// Filter out events from the NotAuthors
+		filteredIds := make([][]byte, 0, len(allEvents))
+		for _, id := range allEvents {
+			// Get the event to check its author
+			event, err := d.GetEventById(id)
+			if err != nil {
+				return nil, err
+			}
+
+			excluded := false
+			for _, notAuthor := range f.NotAuthors {
+				if bytes.Equal(event.Pubkey, notAuthor) {
+					excluded = true
+					break
+				}
+			}
+			if !excluded {
+				filteredIds = append(filteredIds, id)
+			}
+		}
+		return filteredIds, nil
+	}
+
+	// If only NotTags is specified, we need to get all events and filter out those with the specified tags
+	if len(f.NotTags) > 0 && len(f.Ids) == 0 && len(f.Authors) == 0 && len(f.Tags) == 0 && len(f.NotIds) == 0 && len(f.NotAuthors) == 0 && f.Since <= 0 && f.Until <= 0 {
+		// Get all events
+		allEvents, err := d.QueryEvents(filter.F{})
+		if err != nil {
+			return nil, err
+		}
+
+		// Filter out events with the NotTags
+		filteredIds := make([][]byte, 0, len(allEvents))
+		for _, id := range allEvents {
+			// Get the event to check its tags
+			event, err := d.GetEventById(id)
+			if err != nil {
+				return nil, err
+			}
+
+			excluded := false
+			if event.Tags != nil {
+				for notTagName, notTagValues := range f.NotTags {
+					for _, notTagValue := range notTagValues {
+						for _, tag := range *event.Tags {
+							if bytes.Equal(tag.Key, []byte(notTagName)) && bytes.Equal(tag.Value, notTagValue) {
+								excluded = true
+								break
+							}
+						}
+						if excluded {
+							break
+						}
+					}
+					if excluded {
+						break
+					}
+				}
+			}
+			if !excluded {
+				filteredIds = append(filteredIds, id)
+			}
+		}
+		return filteredIds, nil
+	}
+
+	// If both NotAuthors and NotTags are specified, we need to get all events and filter out those that match either criteria
+	if len(f.NotAuthors) > 0 && len(f.NotTags) > 0 && len(f.Ids) == 0 && len(f.Authors) == 0 && len(f.Tags) == 0 && len(f.NotIds) == 0 && f.Since <= 0 && f.Until <= 0 {
+		// Get all events
+		allEvents, err := d.QueryEvents(filter.F{})
+		if err != nil {
+			return nil, err
+		}
+
+		// Filter out events that match either NotAuthors or NotTags
+		filteredIds := make([][]byte, 0, len(allEvents))
+		for _, id := range allEvents {
+			// Get the event to check its author and tags
+			event, err := d.GetEventById(id)
+			if err != nil {
+				return nil, err
+			}
+
+			// Check if author is excluded
+			excluded := false
+			for _, notAuthor := range f.NotAuthors {
+				if bytes.Equal(event.Pubkey, notAuthor) {
+					excluded = true
+					break
+				}
+			}
+
+			// Check if tags are excluded
+			if !excluded && event.Tags != nil {
+				for notTagName, notTagValues := range f.NotTags {
+					for _, notTagValue := range notTagValues {
+						for _, tag := range *event.Tags {
+							if bytes.Equal(tag.Key, []byte(notTagName)) && bytes.Equal(tag.Value, notTagValue) {
+								excluded = true
+								break
+							}
+						}
+						if excluded {
+							break
+						}
+					}
+					if excluded {
+						break
+					}
+				}
+			}
+
+			if !excluded {
+				filteredIds = append(filteredIds, id)
+			}
+		}
+		return filteredIds, nil
 	}
 
 	// Create a map to store unique event serials
@@ -277,32 +446,82 @@ func (d *D) QueryEvents(f filter.F) (eventIds [][]byte, err error) {
 		serials = append(serials, serial)
 	}
 
-	// Sort serials based on the Sort field
-	if f.Sort == "desc" {
-		sort.Slice(serials, func(i, j int) bool {
-			return serials[i] > serials[j]
-		})
-	} else {
-		// Default to ascending order
-		sort.Slice(serials, func(i, j int) bool {
-			return serials[i] < serials[j]
-		})
-	}
-
-	// Get event IDs from serials
+	var ipt []IdPubkeyTimestamp
+	// Get event Id, Pubkey and Timestamps
 	for _, serial := range serials {
 		ser := new(number.Uint40)
 		if err = ser.Set(serial); chk.E(err) {
 			return nil, err
 		}
 
-		var id []byte
-		if id, err = d.GetEventIdFromSerial(ser); chk.E(err) {
+		var item IdPubkeyTimestamp
+		if item.Id, item.Pubkey, item.Timestamp, err = d.GetIdPubkeyTimestampFromSerial(ser); chk.E(err) {
 			return nil, err
 		}
 
-		eventIds = append(eventIds, id)
+		// Skip events from authors in NotAuthors list
+		if len(f.NotAuthors) > 0 {
+			excluded := false
+			for _, notAuthor := range f.NotAuthors {
+				if bytes.Equal(item.Pubkey, notAuthor) {
+					excluded = true
+					break
+				}
+			}
+			if excluded {
+				continue
+			}
+		}
+
+		// Skip events with tags in NotTags list
+		if len(f.NotTags) > 0 {
+			// Get the full event to check its tags
+			event, err := d.GetEventById(item.Id)
+			if err != nil {
+				return nil, err
+			}
+
+			excluded := false
+			// Only check tags if the event has tags
+			if event.Tags != nil {
+				for notTagKey, notTagValues := range f.NotTags {
+					for _, notTagValue := range notTagValues {
+						for _, tag := range *event.Tags {
+							if bytes.Equal(tag.Key, []byte(notTagKey)) && bytes.Equal(tag.Value, notTagValue) {
+								excluded = true
+								break
+							}
+						}
+						if excluded {
+							break
+						}
+					}
+					if excluded {
+						break
+					}
+				}
+			}
+			if excluded {
+				continue
+			}
+		}
+
+		ipt = append(ipt, item)
 	}
 
+	// Sort based on requested Sort in filter, on the event timestamp
+	if f.Sort == "desc" {
+		sort.Slice(ipt, func(i, j int) bool {
+			return ipt[i].Timestamp > ipt[j].Timestamp
+		})
+	} else {
+		// Default to ascending order
+		sort.Slice(ipt, func(i, j int) bool {
+			return ipt[i].Timestamp < ipt[j].Timestamp
+		})
+	}
+	for _, v := range ipt {
+		eventIds = append(eventIds, v.Id)
+	}
 	return eventIds, nil
 }
