@@ -1,0 +1,1 @@
+/home/david/src/github.com/mleku/manifold/.junie/guidelines.md
